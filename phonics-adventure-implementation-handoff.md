@@ -2181,9 +2181,10 @@ After DALL-E generation:
   - [ ] `phonics-adventure-mvp-spec.md` (game design)
 - [ ] Set up Tauri + React project
 - [ ] Configure audio handling (Web Audio API)
-- [ ] Generate phoneme audio via TTS (use prompts in Section 3)
-- [ ] Generate images via DALL-E (use prompts in Section 4)
-- [ ] Process and verify all assets
+- [ ] Generate phoneme audio via TTS (use prompts in Section 3) -- FOR NOW, USE EXISTING PHENOMES
+- [x] Generate images via DALL-E (use prompts in Section 4) -- SKIP THIS STEP
+- [x] Process and verify all assets - SKIP THIS STEP
+
 
 ## Phase A: Foundation (Week 1-2)
 

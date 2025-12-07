@@ -1,22 +1,22 @@
 {
-  "$schema": "https://schema.tauri.app/config/2",
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "SlideSounds",
   "version": "0.1.0",
-  "identifier": "com.slidesounds.app",
+  "identifier": "com.phonicsreader.app",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist"
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build"
   },
   "app": {
     "windows": [
       {
-        "fullscreen": false,
-        "resizable": true,
         "title": "SlideSounds",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "resizable": true,
+        "fullscreen": false
       }
     ],
     "security": {
@@ -26,10 +26,18 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "resources": ["../public/audio"],
+    "category": "Education",
+    "publisher": "Phonics Reader",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
     "iOS": {
+      "developmentTeam": "FF64TZB7HR",
       "minimumSystemVersion": "13.0"
     }
-  },
-  "plugins": {}
+  }
 }
