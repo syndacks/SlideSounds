@@ -1,19 +1,64 @@
-export type PhonemeCategory = 'vowel' | 'consonant' | 'digraph' | 'blend';
+export type PhonemeCategory =
+  | 'short_vowel'
+  | 'long_vowel'
+  | 'continuous_consonant'
+  | 'stop_consonant'
+  | 'digraph'
+  | 'blend'
+  | 'welded'
+  | 'r_controlled'
+  | 'vowel_team'
+  | 'silent';
+
+export interface PhonemeMetadata {
+  /** The grapheme (letter/letters) this represents */
+  grapheme: string;
+  /** IPA-style label for display/debug */
+  label: string;
+  /** Relative path to audio file (from /public) */
+  audioFile: string;
+  /** Category of the phoneme */
+  category: PhonemeCategory;
+  /** Whether this is a stop consonant (plays once, can't sustain) */
+  isStop: boolean;
+  /** Duration hint in milliseconds (for timing) */
+  durationMs?: number;
+}
 
 export interface PhonemeUnit {
-  /** stable identifier (audio file name without extension) */
+  /** Unique ID for this instance (grapheme-index) */
   id: string;
-  /** grapheme as it appears in the UI */
+  /** The grapheme as displayed */
   grapheme: string;
-  /** short label (ă, k, sh) for debug/aria text */
+  /** Display label */
   label: string;
-  /** relative path inside /public for the audio asset */
+  /** Path to audio file */
   audioFile: string;
+  /** Category */
   category: PhonemeCategory;
+  /** Stop consonant flag */
+  isStop: boolean;
+  /** Whether this is a multi-letter unit (digraph, blend, etc.) */
+  isUnit?: boolean;
+  /** Whether this is a silent letter (magic-e) */
+  isSilent?: boolean;
+  /** Duration hint */
+  durationMs?: number;
 }
 
 export interface WordDefinition {
   id: string;
   text: string;
   displayText?: string;
+  /** Optional pre-defined phoneme breakdown (for exceptions) */
+  phonemes?: string[];
+  /** Phase this word belongs to */
+  phase?: number;
+}
+
+export interface ParsedWord {
+  word: string;
+  units: PhonemeUnit[];
+  missingGraphemes: string[];
+  hasAllAudio: boolean;
 }

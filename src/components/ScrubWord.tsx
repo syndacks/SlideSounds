@@ -9,6 +9,7 @@ import {
 import { parseWordToPhonemes } from '../lib/wordParser';
 import { WordDefinition } from '../types/phoneme';
 import { useAudioEngine } from '../hooks/useAudioEngine';
+import { useWordBlendAudio } from '../hooks/useWordBlendAudio';
 import { LetterZone, ZoneVisualState } from './LetterZone';
 
 interface ZoneRect {
@@ -16,77 +17,95 @@ interface ZoneRect {
   endX: number;
 }
 
-export const ScrubWord = ({ word }: { word: WordDefinition }) => {
+interface ScrubWordProps {
+  word: WordDefinition;
+  onComplete?: () => void;
+}
+
+export const ScrubWord = ({ word, onComplete }: ScrubWordProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const letterRefs = useRef<Array<HTMLDivElement | null>>([]);
   const zonesRef = useRef<ZoneRect[]>([]);
   const lastZoneRef = useRef<number | null>(null);
   const isDraggingRef = useRef(false);
+  const stopPlayedRef = useRef<Set<number>>(new Set());
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [furthestCompleted, setFurthestCompleted] = useState(-1);
   const [progressRatio, setProgressRatio] = useState(0);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasCompletedOnce, setHasCompletedOnce] = useState(false);
 
-  const { units, missingGraphemes } = useMemo(
-    () => parseWordToPhonemes(word.text),
-    [word.text],
-  );
+  // Parse the word into phoneme units
+  const parsed = useMemo(() => parseWordToPhonemes(word.text), [word.text]);
+  const { units, missingGraphemes, hasAllAudio } = parsed;
 
   const totalZones = units.length;
   const activeUnit = activeIndex !== null ? units[activeIndex] : null;
   const progressPercent = Math.round(progressRatio * 100);
 
-  const { preloadPhonemes, playPhoneme, resume } = useAudioEngine();
+  const { preloadPhonemes, playPhoneme, stopAll, resetLastPlayed, resume } =
+    useAudioEngine();
+  const { playBlend, isReady: isBlendReady } = useWordBlendAudio(units);
 
+  // Preload audio on mount or word change
   useEffect(() => {
-    if (missingGraphemes.length > 0) {
+    if (missingGraphemes.length > 0 && !hasAllAudio) {
+      // Only show error if there are missing graphemes and we can't play
+      const playableUnits = units.filter((u) => u.audioFile);
+      if (playableUnits.length === 0) {
+        setError(`No audio available for this word`);
+        return;
+      }
+      // Partial audio - show warning but continue
       setError(
-        `Missing phoneme audio for: ${missingGraphemes
+        `Partial audio: missing ${missingGraphemes
           .map((g) => g.toUpperCase())
           .join(', ')}`,
       );
-      return;
+    } else {
+      setError(null);
     }
-    setError(null);
-    if (units.length === 0) {
-      setError('No playable phonemes');
-      return;
-    }
-    preloadPhonemes(units).catch((err) =>
-      setError(`Failed to preload audio: ${err.message}`),
-    );
-  }, [missingGraphemes, preloadPhonemes, units]);
 
+    const playableUnits = units.filter((u) => u.audioFile);
+    if (playableUnits.length > 0) {
+      preloadPhonemes(playableUnits).catch((err) =>
+        setError(`Failed to preload audio: ${err.message}`),
+      );
+    }
+  }, [missingGraphemes, hasAllAudio, preloadPhonemes, units]);
+
+  // Reset state when word changes
   useEffect(() => {
     setActiveIndex(null);
     setFurthestCompleted(-1);
     setProgressRatio(0);
-  }, [word.id]);
+    setHasCompletedOnce(false);
+    stopPlayedRef.current.clear();
+    resetLastPlayed();
+  }, [word.id, resetLastPlayed]);
 
+  // Initialize letter refs
   useEffect(() => {
     letterRefs.current = Array(units.length).fill(null);
   }, [units.length]);
 
+  // Calculate zone boundaries from letter element positions
   const calculateZones = useCallback(() => {
     zonesRef.current = letterRefs.current
       .map((ref): ZoneRect | null => {
-        if (!ref) {
-          return null;
-        }
+        if (!ref) return null;
         const rect = ref.getBoundingClientRect();
-        return {
-          startX: rect.left,
-          endX: rect.right,
-        };
+        return { startX: rect.left, endX: rect.right };
       })
       .filter((zone): zone is ZoneRect => zone !== null);
-  }, [units]);
+  }, []);
 
+  // Find which zone contains the given X coordinate
   const findZoneIndexAtX = useCallback((x: number): number | null => {
     const zones = zonesRef.current;
-    for (let i = 0; i < zones.length; i += 1) {
+    for (let i = 0; i < zones.length; i++) {
       const zone = zones[i];
       if (x >= zone.startX && x <= zone.endX) {
         return i;
@@ -95,11 +114,11 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
     return null;
   }, []);
 
+  // Update progress ratio based on finger position
   const updateProgressFromClientX = useCallback((clientX: number) => {
     const container = containerRef.current;
-    if (!container) {
-      return;
-    }
+    if (!container) return;
+
     const rect = container.getBoundingClientRect();
     const width = rect.width || 1;
     const ratio = (clientX - rect.left) / width;
@@ -107,6 +126,7 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
     setProgressRatio(clamped);
   }, []);
 
+  // Handle zone change - play phoneme when entering a new zone
   const handleZoneChange = useCallback(
     (zoneIndex: number | null) => {
       if (zoneIndex === null) {
@@ -115,14 +135,26 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
         return;
       }
 
+      // Same zone - don't replay
       if (zoneIndex === lastZoneRef.current) {
         return;
       }
 
       const nextUnit = units[zoneIndex];
-      if (nextUnit) {
-        void playPhoneme(nextUnit);
+      if (!nextUnit) return;
+
+      // Handle stop consonants specially
+      if (nextUnit.isStop) {
+        // Only play stops once per scrub session
+        if (!stopPlayedRef.current.has(zoneIndex)) {
+          void playPhoneme(nextUnit, { crossfade: false });
+          stopPlayedRef.current.add(zoneIndex);
+        }
+      } else if (!nextUnit.isSilent && nextUnit.audioFile) {
+        // Continuous sound - play with crossfade
+        void playPhoneme(nextUnit, { crossfade: true });
       }
+
       lastZoneRef.current = zoneIndex;
       setActiveIndex(zoneIndex);
       setFurthestCompleted((current) => Math.max(current, zoneIndex - 1));
@@ -130,11 +162,10 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
     [playPhoneme, units],
   );
 
+  // Handle position change during drag
   const handlePositionChange = useCallback(
     (clientX: number) => {
-      if (!isDraggingRef.current) {
-        return;
-      }
+      if (!isDraggingRef.current) return;
       updateProgressFromClientX(clientX);
       const zoneIndex = findZoneIndexAtX(clientX);
       handleZoneChange(zoneIndex);
@@ -142,42 +173,82 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
     [findZoneIndexAtX, handleZoneChange, updateProgressFromClientX],
   );
 
+  // Start interaction
   const handleInteractionStart = useCallback(
     (clientX: number) => {
       void resume();
       calculateZones();
       isDraggingRef.current = true;
+      stopPlayedRef.current.clear();
       setIsScrubbing(true);
       handlePositionChange(clientX);
     },
     [calculateZones, handlePositionChange, resume],
   );
 
+  // End interaction
   const handleInteractionEnd = useCallback(() => {
-    if (!isDraggingRef.current) {
-      return;
-    }
+    if (!isDraggingRef.current) return;
+
     const lastZone = lastZoneRef.current;
+    const completedIndex = Math.max(
+      furthestCompleted,
+      typeof lastZone === 'number' ? lastZone : -1,
+    );
+
+    // Check if user completed the word (got to 80%+ and touched last zone)
+    const shouldPlayBlend =
+      totalZones > 0 &&
+      completedIndex >= totalZones - 1 &&
+      progressRatio > 0.8 &&
+      isBlendReady;
+
+    // Stop any playing sounds
+    stopAll(100);
+
+    // Reset state
     isDraggingRef.current = false;
     lastZoneRef.current = null;
+    stopPlayedRef.current.clear();
     setIsScrubbing(false);
     setProgressRatio(0);
+
     if (typeof lastZone === 'number') {
       setFurthestCompleted((current) => Math.max(current, lastZone));
     }
     setActiveIndex(null);
-  }, []);
+    resetLastPlayed();
 
+    // Play blended word if completed
+    if (shouldPlayBlend) {
+      setHasCompletedOnce(true);
+      // Small delay before playing blend
+      setTimeout(() => {
+        void playBlend();
+        onComplete?.();
+      }, 150);
+    }
+  }, [
+    furthestCompleted,
+    isBlendReady,
+    playBlend,
+    progressRatio,
+    totalZones,
+    stopAll,
+    resetLastPlayed,
+    onComplete,
+  ]);
+
+  // Set up event listeners
   useLayoutEffect(() => {
     const container = containerRef.current;
-    if (!container) {
-      return;
-    }
+    if (!container) return;
 
     calculateZones();
 
     const supportsPointer = 'onpointerdown' in window;
 
+    // Pointer events (preferred)
     const handlePointerDown = (event: PointerEvent) => {
       event.preventDefault();
       container.setPointerCapture?.(event.pointerId);
@@ -185,9 +256,7 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
     };
 
     const handlePointerMove = (event: PointerEvent) => {
-      if (!isDraggingRef.current) {
-        return;
-      }
+      if (!isDraggingRef.current) return;
       event.preventDefault();
       handlePositionChange(event.clientX);
     };
@@ -198,24 +267,19 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
       handleInteractionEnd();
     };
 
+    // Touch events (fallback)
     const handleTouchStart = (event: TouchEvent) => {
       event.preventDefault();
       const touch = event.touches[0];
-      if (!touch) {
-        return;
-      }
+      if (!touch) return;
       handleInteractionStart(touch.clientX);
     };
 
     const handleTouchMove = (event: TouchEvent) => {
-      if (!isDraggingRef.current) {
-        return;
-      }
+      if (!isDraggingRef.current) return;
       event.preventDefault();
       const touch = event.touches[0];
-      if (!touch) {
-        return;
-      }
+      if (!touch) return;
       handlePositionChange(touch.clientX);
     };
 
@@ -224,15 +288,14 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
       handleInteractionEnd();
     };
 
+    // Mouse events (fallback)
     const handleMouseDown = (event: MouseEvent) => {
       event.preventDefault();
       handleInteractionStart(event.clientX);
     };
 
     const handleMouseMove = (event: MouseEvent) => {
-      if (!isDraggingRef.current) {
-        return;
-      }
+      if (!isDraggingRef.current) return;
       handlePositionChange(event.clientX);
     };
 
@@ -240,6 +303,7 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
       handleInteractionEnd();
     };
 
+    // Attach listeners
     if (supportsPointer) {
       container.addEventListener('pointerdown', handlePointerDown, {
         passive: false,
@@ -274,9 +338,7 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
       container.addEventListener('mouseleave', handleMouseUp);
     }
 
-    const handleResize = () => {
-      calculateZones();
-    };
+    const handleResize = () => calculateZones();
     window.addEventListener('resize', handleResize);
 
     return () => {
@@ -304,45 +366,68 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
     handlePositionChange,
   ]);
 
+  // Compute visual states for each zone
   const zoneStates = useMemo(
     () =>
-      units.map<ZoneVisualState>((_, index) => {
-        if (index <= furthestCompleted) {
-          return 'complete';
-        }
-        if (index === activeIndex) {
-          return 'active';
-        }
+      units.map<ZoneVisualState>((_unit, index) => {
+        if (index <= furthestCompleted) return 'complete';
+        if (index === activeIndex) return 'active';
         return 'inactive';
       }),
     [activeIndex, furthestCompleted, units],
   );
 
+  // Generate prompt text
   const promptText = useMemo(() => {
+    if (hasCompletedOnce) {
+      return '✨ Great job! Try again or go to the next word.';
+    }
     if (isScrubbing && activeUnit) {
-      return `Blend the "${activeUnit.grapheme.toUpperCase()}" sound.`;
+      if (activeUnit.isSilent) {
+        return 'This letter is silent - keep sliding!';
+      }
+      if (activeUnit.isStop) {
+        return `Quick tap! "${activeUnit.grapheme.toUpperCase()}" is a stop sound.`;
+      }
+      return `"${activeUnit.grapheme.toUpperCase()}" makes the ${activeUnit.label} sound.`;
     }
     if (isScrubbing) {
-      return 'Stay on the word to keep the sound flowing.';
+      return 'Keep sliding to blend all the sounds!';
     }
-    return 'Press and slide across every letter to wake the word.';
-  }, [activeUnit, isScrubbing]);
+    return '👆 Press and slide across every letter.';
+  }, [activeUnit, hasCompletedOnce, isScrubbing]);
 
   return (
     <div className="scrub-word-container">
       <div className="scrub-word__instruction-row">
-        <p className="scrub-word__instruction">Slide to blend every sound.</p>
+        <p className="scrub-word__instruction">
+          Slide to blend every sound.
+        </p>
         <span
           className={`scrub-word__status ${
             isScrubbing ? 'scrub-word__status--active' : ''
-          }`}
+          } ${hasCompletedOnce ? 'scrub-word__status--complete' : ''}`}
         >
-          {isScrubbing ? 'Scrubbing…' : 'Press & hold'}
+          {hasCompletedOnce
+            ? '✓ Complete'
+            : isScrubbing
+            ? 'Scrubbing…'
+            : 'Press & hold'}
         </span>
       </div>
-      {error && <div className="scrub-word__error">{error}</div>}
+
+      {error && (
+        <div
+          className={`scrub-word__error ${
+            hasAllAudio ? '' : 'scrub-word__error--warning'
+          }`}
+        >
+          {error}
+        </div>
+      )}
+
       <div
-        className="scrub-word"
+        className={`scrub-word ${hasCompletedOnce ? 'scrub-word--complete' : ''}`}
         ref={containerRef}
         role="group"
         aria-label={`Scrubbable word ${word.displayText ?? word.text}`}
@@ -353,12 +438,16 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
             display={unit.grapheme}
             label={unit.label}
             state={zoneStates[index]}
+            isUnit={unit.isUnit}
+            isStop={unit.isStop}
+            isSilent={unit.isSilent}
             ref={(el) => {
               letterRefs.current[index] = el;
             }}
           />
         ))}
       </div>
+
       <div className="scrub-word__track-wrapper" aria-hidden="true">
         <div className="scrub-word__track">
           <div
@@ -369,7 +458,9 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
             {units.map((unit, index) => (
               <span
                 key={`${unit.id}-marker`}
-                className="scrub-word__track-marker"
+                className={`scrub-word__track-marker ${
+                  unit.isStop ? 'scrub-word__track-marker--stop' : ''
+                }`}
                 style={{
                   left:
                     totalZones <= 1
@@ -387,6 +478,7 @@ export const ScrubWord = ({ word }: { word: WordDefinition }) => {
           />
         </div>
       </div>
+
       <div className="scrub-word__prompt">
         <p>{promptText}</p>
         <span className="scrub-word__percent">{progressPercent}%</span>
