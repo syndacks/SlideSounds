@@ -1,6 +1,9 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { getAnimalById } from '../data/animals';
+import { getWordById } from '../data/words';
 import { useGameStore } from '../stores/gameStore';
+import { AnimalAvatar } from '../components/AnimalAvatar';
+import { useAnimalState } from '../hooks/useAnimalState';
 
 export const CelebrationScreen = () => {
   const navigate = useNavigate();
@@ -8,6 +11,7 @@ export const CelebrationScreen = () => {
   const resetAnimalProgress = useGameStore((state) => state.resetAnimalProgress);
 
   const animal = animalId ? getAnimalById(animalId) : undefined;
+  const avatarState = useAnimalState(1, { isCelebrating: true });
 
   const handleGoHome = () => {
     navigate('/');
@@ -37,24 +41,30 @@ export const CelebrationScreen = () => {
     <div className="screen celebration-screen">
       <div className="celebration-screen__confetti" aria-hidden="true" />
       <div className="celebration-screen__content">
-        <div className="celebration-screen__animal" aria-hidden="true">
-          {animal.emoji}
-        </div>
+        <AnimalAvatar animal={animal} state={avatarState} size="large" />
         <h1 className="celebration-screen__title">Amazing job!</h1>
         <p className="celebration-screen__subtitle">
           {animal.name} can talk now!
         </p>
 
         <div className="celebration-screen__words">
-          {animal.words.map((wordId) => (
-            <span key={wordId} className="celebration-screen__word">
-              {wordId}
-            </span>
-          ))}
+          {animal.words.map((wordId) => {
+            const word = getWordById(wordId);
+            return (
+              <span key={wordId} className="celebration-screen__word">
+                {(word?.displayText ?? word?.text ?? wordId).toUpperCase()}
+              </span>
+            );
+          })}
         </div>
 
         <div className="celebration-screen__stars" aria-hidden="true">
-          {'★★★★★'}
+          {Array.from({ length: 5 }).map((_, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <span key={index} style={{ animationDelay: `${index * 120}ms` }}>
+              ⭐
+            </span>
+          ))}
         </div>
 
         <div className="celebration-screen__actions">
@@ -77,4 +87,3 @@ export const CelebrationScreen = () => {
     </div>
   );
 };
-

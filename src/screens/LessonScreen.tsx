@@ -1,7 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ScrubWord } from '../components/ScrubWord';
 import { getWordById } from '../data/words';
+import { getAnimalById } from '../data/animals';
+import { AnimalAvatar } from '../components/AnimalAvatar';
+import { useAnimalState } from '../hooks/useAnimalState';
+import { TutorialOverlay } from '../components/TutorialOverlay';
+import { useTutorialState } from '../hooks/useTutorialState';
 import { useGameStore, useWordNavigation } from '../stores/gameStore';
 
 export const LessonScreen = () => {
@@ -13,6 +18,10 @@ export const LessonScreen = () => {
 
   const { currentIndex, totalWords } = useWordNavigation();
   const word = currentWordId ? getWordById(currentWordId) : undefined;
+  const currentAnimal = animalId ? getAnimalById(animalId) : undefined;
+  const [scrubProgress, setScrubProgress] = useState(0);
+  const avatarState = useAnimalState(scrubProgress);
+  const tutorial = useTutorialState();
 
   useEffect(() => {
     if (!animalId) {
@@ -37,6 +46,10 @@ export const LessonScreen = () => {
     if (!currentWordId) return;
     navigate(`/check/${currentWordId}`);
   };
+
+  useEffect(() => {
+    setScrubProgress(0);
+  }, [word?.id]);
 
   if (!word) {
     return (
@@ -69,13 +82,29 @@ export const LessonScreen = () => {
         )}
       </header>
 
-      <ScrubWord word={word} onComplete={handleComplete} />
+      {currentAnimal && (
+        <div className="lesson-screen__avatar-wrapper">
+          <AnimalAvatar animal={currentAnimal} state={avatarState} size="large" />
+          <p className="lesson-screen__avatar-prompt">
+            Help {currentAnimal.name} say &ldquo;{word.displayText ?? word.text}&rdquo;!
+          </p>
+        </div>
+      )}
+
+      <ScrubWord
+        word={word}
+        onComplete={handleComplete}
+        onProgressChange={setScrubProgress}
+        onInteractionStart={tutorial.dismiss}
+      />
 
       <footer className="lesson-screen__footer">
         <div className="lesson-screen__keyboard-hints">
           <span>Scrub the word to help Pig talk.</span>
         </div>
       </footer>
+
+      {tutorial.isVisible && <TutorialOverlay onDismiss={tutorial.dismiss} />}
     </div>
   );
 };

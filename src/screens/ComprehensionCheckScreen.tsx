@@ -1,16 +1,22 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCheckForWord } from '../data/comprehensionChecks';
 import { getWordById } from '../data/words';
 import { getPigAnimal, useGameStore } from '../stores/gameStore';
+import { useWordAudio } from '../hooks/useWordAudio';
+import { AnimalAvatar } from '../components/AnimalAvatar';
+import { useAnimalState } from '../hooks/useAnimalState';
 
-type OptionState = 'idle' | 'correct' | 'incorrect';
+type OptionState = 'idle' | 'selecting' | 'correct' | 'incorrect';
 
 export const ComprehensionCheckScreen = () => {
   const navigate = useNavigate();
   const { wordId } = useParams<{ wordId: string }>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [optionState, setOptionState] = useState<OptionState>('idle');
+  const [incorrectSelections, setIncorrectSelections] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const pig = getPigAnimal();
   const markWordCompleted = useGameStore((state) => state.markWordCompleted);
@@ -20,6 +26,15 @@ export const ComprehensionCheckScreen = () => {
 
   const check = wordId ? getCheckForWord(wordId) : undefined;
   const targetWord = wordId ? getWordById(wordId) : undefined;
+  const { play: playWordAudio, isLoading: isAudioLoading, hasAudio: hasWordAudio } =
+    useWordAudio(targetWord);
+  const avatarState = useAnimalState(1);
+
+  useEffect(() => {
+    setIncorrectSelections(new Set<string>());
+    setSelectedId(null);
+    setOptionState('idle');
+  }, [wordId]);
 
   const options = useMemo(() => {
     if (!check) return [];
@@ -37,15 +52,16 @@ export const ComprehensionCheckScreen = () => {
   };
 
   const handleOptionClick = (optionId: string) => {
-    if (!check || !pig || optionState === 'correct') return;
+    if (!check || !pig || optionState === 'correct' || optionState === 'selecting') return;
     setSelectedId(optionId);
+    setOptionState('selecting');
 
     if (optionId === check.wordId) {
       setOptionState('correct');
       markWordCompleted(check.wordId);
 
       const nextId = getNextWordForCurrentAnimal();
-      const timeout = setTimeout(() => {
+      window.setTimeout(() => {
         if (nextId) {
           useGameStore.getState().setCurrentWordId(nextId);
           navigate(`/lesson/${pig.id}`);
@@ -53,17 +69,29 @@ export const ComprehensionCheckScreen = () => {
           navigate(`/celebration/${pig.id}`);
         }
       }, 1000);
-
-      return () => clearTimeout(timeout);
+      return;
     }
 
     setOptionState('incorrect');
+    setIncorrectSelections((prev) => {
+      const next = new Set(prev);
+      next.add(optionId);
+      return next;
+    });
     // Allow the child to try again; reset state after a moment.
     window.setTimeout(() => {
       setOptionState('idle');
       setSelectedId(null);
     }, 800);
   };
+
+  useEffect(() => {
+    if (!targetWord || !hasWordAudio) return;
+    const timeout = window.setTimeout(() => {
+      void playWordAudio();
+    }, 500);
+    return () => window.clearTimeout(timeout);
+  }, [hasWordAudio, playWordAudio, targetWord?.id]);
 
   if (!wordId || !check || !targetWord || !pig) {
     return (
@@ -92,37 +120,61 @@ export const ComprehensionCheckScreen = () => {
 
       <main className="shell-screen__content">
         <div className="check-screen__top">
-          <div className="check-screen__animal" aria-hidden="true">
-            🐷
-          </div>
+          {pig && (
+            <AnimalAvatar animal={pig} state={avatarState} size="medium" />
+          )}
           <p className="check-screen__prompt">
             Which one is <span className="check-screen__word">&apos;{targetWord.text}&apos;</span>?
           </p>
         </div>
 
         <div className="check-screen__options">
-          {options.map((optionId) => {
+          {options.map((optionId, index) => {
             const word = getWordById(optionId);
             if (!word) return null;
 
-            let stateClass = '';
-            if (selectedId === optionId && optionState === 'correct') {
-              stateClass = 'check-option--correct';
-            } else if (selectedId === optionId && optionState === 'incorrect') {
-              stateClass = 'check-option--incorrect';
+            const displayWord = (word.displayText ?? word.text).toUpperCase();
+            const firstLetter = displayWord.charAt(0);
+            const remainder = displayWord.slice(1);
+
+            const classes = ['check-option', `check-option--theme-${(index % 3) + 1}`];
+            const isSelected = selectedId === optionId;
+
+            if (isSelected && optionState === 'selecting') {
+              classes.push('check-option--selecting');
             }
+            if (isSelected && optionState === 'correct') {
+              classes.push('check-option--correct');
+            }
+            if (isSelected && optionState === 'incorrect') {
+              classes.push('check-option--incorrect');
+            }
+
+            const isDimmed =
+              incorrectSelections.has(optionId) ||
+              (optionState === 'correct' && optionId !== check.wordId);
+            if (isDimmed) {
+              classes.push('check-option--dimmed');
+            }
+            const shouldDisable = isDimmed || optionState === 'correct';
 
             return (
               <button
                 key={optionId}
                 type="button"
-                className={`check-option ${stateClass}`}
+                className={classes.join(' ')}
+                disabled={shouldDisable}
                 onClick={() => handleOptionClick(optionId)}
               >
-                <span className="check-option__emoji" aria-hidden="true">
-                  🖼️
+                <span className="check-option__status-icon" aria-hidden="true">
+                  ✓
+                </span>
+                <span className="check-option__word" aria-hidden="true">
+                  <span className="check-option__word-initial">{firstLetter}</span>
+                  {remainder}
                 </span>
                 <span className="check-option__label">{word.displayText ?? word.text}</span>
+                <span className="check-option__decor" aria-hidden="true" />
               </button>
             );
           })}
@@ -131,14 +183,14 @@ export const ComprehensionCheckScreen = () => {
         <button
           type="button"
           className="check-screen__hear-again"
+          disabled={!hasWordAudio}
           onClick={() => {
-            // Placeholder hook for playing audio in a future phase.
+            void playWordAudio();
           }}
         >
-          🔊 Hear Again
+          {isAudioLoading ? 'Loading audio…' : '🔊 Hear Again'}
         </button>
       </main>
     </div>
   );
 };
-

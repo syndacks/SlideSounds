@@ -1,8 +1,13 @@
 interface Progress {
   completedWords: string[];
+  hasSeenTutorial?: boolean;
 }
 
 const STORAGE_KEY = 'slidesounds_progress';
+const DEFAULT_PROGRESS: Progress = {
+  completedWords: [],
+  hasSeenTutorial: false,
+};
 
 function isBrowserEnvironment(): boolean {
   return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
@@ -10,13 +15,13 @@ function isBrowserEnvironment(): boolean {
 
 export function loadProgress(): Progress {
   if (!isBrowserEnvironment()) {
-    return { completedWords: [] };
+    return { ...DEFAULT_PROGRESS };
   }
 
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      return { completedWords: [] };
+      return { ...DEFAULT_PROGRESS };
     }
     const parsed = JSON.parse(raw);
     if (
@@ -28,13 +33,14 @@ export function loadProgress(): Progress {
         completedWords: parsed.completedWords.filter(
           (id: unknown): id is string => typeof id === 'string',
         ),
+        hasSeenTutorial: Boolean(parsed.hasSeenTutorial),
       };
     }
   } catch {
     // If anything goes wrong, start fresh rather than crashing.
   }
 
-  return { completedWords: [] };
+  return { ...DEFAULT_PROGRESS };
 }
 
 export function saveProgress(progress: Progress): void {
@@ -43,7 +49,11 @@ export function saveProgress(progress: Progress): void {
   }
 
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    const payload: Progress = {
+      completedWords: progress.completedWords ?? [],
+      hasSeenTutorial: Boolean(progress.hasSeenTutorial),
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   } catch {
     // Ignore write errors in constrained environments.
   }
@@ -57,6 +67,19 @@ export function markWordComplete(wordId: string): void {
   }
 }
 
+export function getHasSeenTutorial(): boolean {
+  return Boolean(loadProgress().hasSeenTutorial);
+}
+
+export function setTutorialSeen(): void {
+  const progress = loadProgress();
+  if (progress.hasSeenTutorial) {
+    return;
+  }
+  progress.hasSeenTutorial = true;
+  saveProgress(progress);
+}
+
 export function resetProgress(): void {
   if (!isBrowserEnvironment()) {
     return;
@@ -68,4 +91,3 @@ export function resetProgress(): void {
     // Ignore errors on reset.
   }
 }
-

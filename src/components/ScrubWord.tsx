@@ -20,9 +20,16 @@ interface ZoneRect {
 interface ScrubWordProps {
   word: WordDefinition;
   onComplete?: () => void;
+  onProgressChange?: (ratio: number) => void;
+  onInteractionStart?: () => void;
 }
 
-export const ScrubWord = ({ word, onComplete }: ScrubWordProps) => {
+export const ScrubWord = ({
+  word,
+  onComplete,
+  onProgressChange,
+  onInteractionStart,
+}: ScrubWordProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const letterRefs = useRef<Array<HTMLDivElement | null>>([]);
   const zonesRef = useRef<ZoneRect[]>([]);
@@ -176,6 +183,7 @@ export const ScrubWord = ({ word, onComplete }: ScrubWordProps) => {
   // Start interaction
   const handleInteractionStart = useCallback(
     (clientX: number) => {
+      onInteractionStart?.();
       void resume();
       calculateZones();
       isDraggingRef.current = true;
@@ -183,7 +191,7 @@ export const ScrubWord = ({ word, onComplete }: ScrubWordProps) => {
       setIsScrubbing(true);
       handlePositionChange(clientX);
     },
-    [calculateZones, handlePositionChange, resume],
+    [calculateZones, handlePositionChange, onInteractionStart, resume],
   );
 
   // End interaction
@@ -238,6 +246,10 @@ export const ScrubWord = ({ word, onComplete }: ScrubWordProps) => {
     resetLastPlayed,
     onComplete,
   ]);
+
+  useEffect(() => {
+    onProgressChange?.(progressRatio);
+  }, [onProgressChange, progressRatio]);
 
   // Set up event listeners
   useLayoutEffect(() => {

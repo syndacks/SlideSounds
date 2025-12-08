@@ -15,6 +15,15 @@ body {
   background: linear-gradient(135deg, #f0f4ff 0%, #fcf2ff 100%);
 }
 
+button {
+  font-family: inherit;
+  transition: transform 150ms ease, box-shadow 150ms ease, opacity 120ms ease;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
 #root {
   min-height: 100vh;
 }
@@ -31,6 +40,12 @@ body {
   padding: 32px;
 }
 
+.home-screen,
+.lesson-screen,
+.screen {
+  animation: pageEnter 0.45s ease;
+}
+
 /* ============================================================================
    LESSON SCREEN
    ============================================================================ */
@@ -41,6 +56,8 @@ body {
   border-radius: 24px;
   padding: 32px;
   box-shadow: 0 20px 45px rgba(31, 42, 68, 0.12);
+  position: relative;
+  overflow: hidden;
 }
 
 .lesson-screen__header {
@@ -120,6 +137,106 @@ body {
 .lesson-screen__keyboard-hints {
   font-size: 0.8rem;
   color: #9aa5c4;
+}
+
+.lesson-screen__avatar-wrapper {
+  margin: 24px auto;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.lesson-screen__avatar-prompt {
+  margin: 0;
+  font-weight: 600;
+  color: #3a4262;
+}
+
+/* ============================================================================
+   ANIMAL AVATAR
+   ============================================================================ */
+
+.animal-avatar {
+  position: relative;
+  border: 2px solid #e0e5f0;
+  border-radius: 28px;
+  padding: 18px;
+  min-width: 150px;
+  background: radial-gradient(circle at top, #fff9f2 0%, #fff4e6 50%, #ffffff 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  transition: transform 200ms ease, filter 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.animal-avatar--small {
+  padding: 12px;
+  min-width: 120px;
+}
+
+.animal-avatar--large {
+  padding: 26px;
+}
+
+.animal-avatar__emoji {
+  font-size: clamp(2.2rem, 8vw, 3.6rem);
+  line-height: 1;
+}
+
+.animal-avatar__badge {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(255, 178, 104, 0.25);
+}
+
+.animal-avatar__name {
+  font-weight: 700;
+  color: #2d3658;
+  margin-top: 4px;
+}
+
+.animal-avatar__status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #7b88b4;
+}
+
+.animal-avatar--sleeping {
+  filter: grayscale(80%);
+  opacity: 0.85;
+}
+
+.animal-avatar--stirring {
+  filter: grayscale(45%);
+}
+
+.animal-avatar--waking {
+  filter: grayscale(0%);
+  transform: scale(1.03);
+  box-shadow: 0 20px 35px rgba(255, 179, 71, 0.2);
+}
+
+.animal-avatar--awake {
+  filter: none;
+  border-color: #ffb347;
+  box-shadow: 0 20px 45px rgba(255, 179, 71, 0.35);
+  animation: avatarBounce 0.4s ease-out;
+}
+
+.animal-avatar--celebrating {
+  border-color: #ff7ac3;
+  box-shadow: 0 25px 50px rgba(255, 122, 195, 0.35);
+  animation: avatarJump 0.6s ease-in-out infinite;
 }
 
 /* ============================================================================
@@ -489,4 +606,118 @@ body {
 
 .scrub-word--complete .letter-zone--complete {
   animation: bounce 0.5s ease-out;
+}
+
+@keyframes avatarBounce {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08) translateY(-4px);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes avatarJump {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes tutorialSwipe {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+    left: calc(100% - 18px);
+  }
+  100% {
+    opacity: 0;
+    left: calc(100% - 18px);
+  }
+}
+
+@keyframes pageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.tutorial-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 25, 54, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  padding: 0;
+  pointer-events: none;
+}
+
+.tutorial-overlay__content {
+  pointer-events: auto;
+  border: none;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px 32px;
+  box-shadow: 0 25px 65px rgba(31, 42, 68, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 280px;
+  cursor: pointer;
+}
+
+.tutorial-overlay__content:focus-visible {
+  outline: 3px solid #ffb347;
+  outline-offset: 4px;
+}
+
+.tutorial-overlay__hand {
+  font-size: 2.5rem;
+  animation: avatarBounce 0.9s ease-in-out infinite;
+}
+
+.tutorial-overlay__text {
+  margin: 0;
+  font-weight: 700;
+  color: #1f2a44;
+  text-align: center;
+}
+
+.tutorial-overlay__arrow {
+  width: 90px;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #ffb347, transparent);
+  position: relative;
+  overflow: hidden;
+}
+
+.tutorial-overlay__arrow::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  width: 18px;
+  height: 14px;
+  border-radius: 8px;
+  background: #ff8132;
+  animation: tutorialSwipe 1.2s ease-in-out infinite;
 }
