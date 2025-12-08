@@ -47,7 +47,7 @@ export const ScrubWord = ({ word, onComplete }: ScrubWordProps) => {
 
   const { preloadPhonemes, playPhoneme, stopAll, resetLastPlayed, resume } =
     useAudioEngine();
-  const { playBlend, isReady: isBlendReady } = useWordBlendAudio(units);
+  const { playBlend, isReady: isBlendReady } = useWordBlendAudio(word.id, units);
 
   // Preload audio on mount or word change
   useEffect(() => {
