@@ -1,33 +1,42 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ScrubWord } from '../components/ScrubWord';
 import { getWordById } from '../data/words';
 import { useGameStore, useWordNavigation } from '../stores/gameStore';
 
 export const LessonScreen = () => {
+  const navigate = useNavigate();
+  const { animalId } = useParams<{ animalId: string }>();
+
   const currentWordId = useGameStore((state) => state.currentWordId);
-  const markComplete = useGameStore((state) => state.markComplete);
-  const word = getWordById(currentWordId);
+  const setCurrentAnimal = useGameStore((state) => state.setCurrentAnimal);
 
-  const { currentIndex, totalWords, nextWord, previousWord, hasNext, hasPrevious } =
-    useWordNavigation();
+  const { currentIndex, totalWords } = useWordNavigation();
+  const word = currentWordId ? getWordById(currentWordId) : undefined;
 
-  const handleComplete = useCallback(() => {
-    markComplete();
-  }, [markComplete]);
-
-  // Keyboard navigation for desktop testing
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowRight' && hasNext) {
-        nextWord();
-      } else if (event.key === 'ArrowLeft' && hasPrevious) {
-        previousWord();
-      }
-    };
+    if (!animalId) {
+      navigate('/');
+      return;
+    }
+    setCurrentAnimal(animalId);
+  }, [animalId, navigate, setCurrentAnimal]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [hasNext, hasPrevious, nextWord, previousWord]);
+  useEffect(() => {
+    if (!animalId) return;
+    if (!currentWordId) {
+      navigate(`/celebration/${animalId}`);
+    }
+  }, [animalId, currentWordId, navigate]);
+
+  const handleBack = () => {
+    navigate('/animals/farm');
+  };
+
+  const handleComplete = () => {
+    if (!currentWordId) return;
+    navigate(`/check/${currentWordId}`);
+  };
 
   if (!word) {
     return (
@@ -43,24 +52,16 @@ export const LessonScreen = () => {
       <header className="lesson-screen__header">
         <div className="lesson-screen__nav">
           <button
+            type="button"
             className="lesson-screen__nav-btn"
-            onClick={previousWord}
-            disabled={!hasPrevious}
-            aria-label="Previous word"
+            onClick={handleBack}
+            aria-label="Back to animals"
           >
-            ← Prev
+            ← Back
           </button>
           <span className="lesson-screen__progress">
-            Word {currentIndex} of {totalWords}
+            Word {currentIndex || 1} of {totalWords || 5}
           </span>
-          <button
-            className="lesson-screen__nav-btn"
-            onClick={nextWord}
-            disabled={!hasNext}
-            aria-label="Next word"
-          >
-            Next →
-          </button>
         </div>
         <h1 className="lesson-screen__word">{word.displayText ?? word.text}</h1>
         {word.phase && (
@@ -72,7 +73,7 @@ export const LessonScreen = () => {
 
       <footer className="lesson-screen__footer">
         <div className="lesson-screen__keyboard-hints">
-          <span>Use arrow keys ← → to navigate words</span>
+          <span>Scrub the word to help Pig talk.</span>
         </div>
       </footer>
     </div>

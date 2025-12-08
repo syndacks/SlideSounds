@@ -1,99 +1,177 @@
 import { create } from 'zustand';
-import {
-  DEFAULT_LESSON_WORD_ID,
-  getNextWord,
-  getPreviousWord,
-  getWordIndex,
-  TOTAL_WORDS,
-} from '../data/words';
+import { ANIMALS, getAnimalById } from '../data/animals';
+import { loadProgress, markWordComplete as persistWordComplete } from '../lib/progressStorage';
+
+type AnimalId = string;
+type WordId = string;
 
 interface GameState {
+  /** Currently selected animal for the lesson flow */
+  currentAnimalId: AnimalId | null;
+
   /** Current word being practiced */
-  currentWordId: string;
+  currentWordId: WordId | null;
 
-  /** Set the current word */
-  setWordId: (wordId: string) => void;
+  /** Set the current animal and choose the starting word (first incomplete) */
+  setCurrentAnimal: (animalId: AnimalId) => void;
 
-  /** Navigate to next word */
-  nextWord: () => void;
+  /** Explicitly set the current word ID */
+  setCurrentWordId: (wordId: WordId) => void;
 
-  /** Navigate to previous word */
-  previousWord: () => void;
+  /** IDs of words that have been fully completed (passed comprehension check) */
+  completedWords: Set<WordId>;
 
-  /** Get current word index (1-based for display) */
-  getCurrentIndex: () => number;
+  /** Mark a word as fully completed and persist progress */
+  markWordCompleted: (wordId: WordId) => void;
 
-  /** Total words available */
-  totalWords: number;
+  /** Get ordered word IDs for the given animal */
+  getAnimalWordIds: (animalId: AnimalId) => WordId[];
 
-  /** Whether the current word has been completed */
-  wordCompleted: boolean;
+  /** Get progress for an animal */
+  getAnimalProgress: (animalId: AnimalId) => { completed: number; total: number };
 
-  /** Mark current word as completed */
-  markComplete: () => void;
+  /** Get zero-based index of current word within the animal's word list, or -1 */
+  getCurrentWordIndexForCurrentAnimal: () => number;
 
-  /** Reset completion state */
-  resetCompletion: () => void;
+  /** Get total words for the current animal, or 0 */
+  getTotalWordsForCurrentAnimal: () => number;
+
+  /** Get the next word ID for the current animal, or null if at the end */
+  getNextWordForCurrentAnimal: () => WordId | null;
+
+  /** Get the first incomplete word ID for an animal, or null if all done */
+  getFirstIncompleteWordForAnimal: (animalId: AnimalId) => WordId | null;
+
+  /** Reset all completed words for an animal (used for "Play Again") */
+  resetAnimalProgress: (animalId: AnimalId) => void;
 }
 
-export const useGameStore = create<GameState>((set, get) => ({
-  currentWordId: DEFAULT_LESSON_WORD_ID,
-  totalWords: TOTAL_WORDS,
-  wordCompleted: false,
+const initialCompletedWords = new Set<WordId>(loadProgress().completedWords);
 
-  setWordId: (wordId) =>
+export const useGameStore = create<GameState>((set, get) => ({
+  currentAnimalId: null,
+  currentWordId: null,
+  completedWords: initialCompletedWords,
+
+  setCurrentAnimal: (animalId) => {
+    const firstIncomplete = get().getFirstIncompleteWordForAnimal(animalId);
+    set({
+      currentAnimalId: animalId,
+      currentWordId: firstIncomplete,
+    });
+  },
+
+  setCurrentWordId: (wordId) =>
     set({
       currentWordId: wordId,
-      wordCompleted: false,
     }),
 
-  nextWord: () => {
-    const { currentWordId } = get();
-    const next = getNextWord(currentWordId);
-    if (next) {
-      set({
-        currentWordId: next.id,
-        wordCompleted: false,
-      });
+  markWordCompleted: (wordId) => {
+    const { completedWords } = get();
+    if (!completedWords.has(wordId)) {
+      const nextCompleted = new Set(completedWords);
+      nextCompleted.add(wordId);
+      persistWordComplete(wordId);
+      set({ completedWords: nextCompleted });
     }
   },
 
-  previousWord: () => {
-    const { currentWordId } = get();
-    const prev = getPreviousWord(currentWordId);
-    if (prev) {
-      set({
-        currentWordId: prev.id,
-        wordCompleted: false,
-      });
+  getAnimalWordIds: (animalId) => {
+    const animal = getAnimalById(animalId);
+    return animal?.words ?? [];
+  },
+
+  getAnimalProgress: (animalId) => {
+    const { completedWords } = get();
+    const animal = getAnimalById(animalId);
+    const allWords = animal?.words ?? [];
+    const completed = allWords.filter((id) => completedWords.has(id)).length;
+    return {
+      completed,
+      total: allWords.length,
+    };
+  },
+
+  getCurrentWordIndexForCurrentAnimal: () => {
+    const { currentAnimalId, currentWordId, getAnimalWordIds } = get();
+    if (!currentAnimalId || !currentWordId) {
+      return -1;
     }
+    const words = getAnimalWordIds(currentAnimalId);
+    return words.indexOf(currentWordId);
   },
 
-  getCurrentIndex: () => {
-    const { currentWordId } = get();
-    return getWordIndex(currentWordId) + 1; // 1-based for display
+  getTotalWordsForCurrentAnimal: () => {
+    const { currentAnimalId, getAnimalWordIds } = get();
+    if (!currentAnimalId) {
+      return 0;
+    }
+    return getAnimalWordIds(currentAnimalId).length;
   },
 
-  markComplete: () => set({ wordCompleted: true }),
+  getNextWordForCurrentAnimal: () => {
+    const {
+      currentAnimalId,
+      currentWordId,
+      getAnimalWordIds,
+      getFirstIncompleteWordForAnimal,
+    } = get();
+    if (!currentAnimalId) {
+      return null;
+    }
+    const words = getAnimalWordIds(currentAnimalId);
+    if (!words.length) {
+      return null;
+    }
+    if (!currentWordId) {
+      return getFirstIncompleteWordForAnimal(currentAnimalId);
+    }
+    const currentIndex = words.indexOf(currentWordId);
+    if (currentIndex === -1) {
+      return getFirstIncompleteWordForAnimal(currentAnimalId);
+    }
+    // For now, advance sequentially through the animal's word list.
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= words.length) {
+      return null;
+    }
+    return words[nextIndex];
+  },
 
-  resetCompletion: () => set({ wordCompleted: false }),
+  getFirstIncompleteWordForAnimal: (animalId) => {
+    const { completedWords } = get();
+    const animal = getAnimalById(animalId);
+    if (!animal) return null;
+    return animal.words.find((id) => !completedWords.has(id)) ?? null;
+  },
+
+  resetAnimalProgress: (animalId) => {
+    const { completedWords } = get();
+    const animal = getAnimalById(animalId);
+    if (!animal) return;
+    const nextCompleted = new Set(completedWords);
+    animal.words.forEach((id) => nextCompleted.delete(id));
+    // Do not clear storage here; ComprehensionCheck will write new progress as words are re-completed.
+    set({ completedWords: nextCompleted });
+  },
 }));
 
 /**
- * Hook to get word navigation info
+ * Hook to get word navigation info for the current animal.
  */
 export const useWordNavigation = () => {
-  const totalWords = useGameStore((s) => s.totalWords);
-  const nextWord = useGameStore((s) => s.nextWord);
-  const previousWord = useGameStore((s) => s.previousWord);
-  const getCurrentIndex = useGameStore((s) => s.getCurrentIndex);
+  const currentIndex = useGameStore((s) => s.getCurrentWordIndexForCurrentAnimal());
+  const totalWords = useGameStore((s) => s.getTotalWordsForCurrentAnimal());
 
   return {
-    currentIndex: getCurrentIndex(),
+    currentIndex: currentIndex >= 0 ? currentIndex + 1 : 0,
     totalWords,
-    nextWord,
-    previousWord,
-    hasNext: getCurrentIndex() < totalWords,
-    hasPrevious: getCurrentIndex() > 1,
+    hasNext: currentIndex >= 0 && currentIndex + 1 < totalWords,
+    hasPrevious: currentIndex > 0,
   };
 };
+
+/**
+ * Convenience helper to get the single pig animal used in the MVP.
+ */
+export const getPigAnimal = () => ANIMALS.find((animal) => animal.id === 'pig');
