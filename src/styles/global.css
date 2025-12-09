@@ -265,8 +265,16 @@ button:active:not(:disabled) {
   border: 3px solid #e8edf8;
   touch-action: none;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   transition: border-color 300ms ease, background 300ms ease, box-shadow 300ms ease;
   box-shadow: 0 8px 32px rgba(40, 60, 100, 0.08);
+}
+
+.scrub-word * {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .scrub-word--scrubbing {
