@@ -56,7 +56,6 @@ export const LessonScreen = () => {
   if (!word) {
     return (
       <div className="lesson-screen">
-        <h1>Lesson</h1>
         <p>Word not found.</p>
       </div>
     );
@@ -75,21 +74,14 @@ export const LessonScreen = () => {
             ← Back
           </button>
           <span className="lesson-screen__progress">
-            Word {currentIndex || 1} of {totalWords || 5}
+            {currentIndex || 1} / {totalWords || 5}
           </span>
         </div>
-        <h1 className="lesson-screen__word">{word.displayText ?? word.text}</h1>
-        {word.phase && (
-          <span className="lesson-screen__phase">Phase {word.phase}</span>
-        )}
       </header>
 
       {currentAnimal && (
         <div className="lesson-screen__avatar-wrapper">
           <AnimalAvatar animal={currentAnimal} state={avatarState} size="large" />
-          <p className="lesson-screen__avatar-prompt">
-            Help {currentAnimal.name} say &ldquo;{word.displayText ?? word.text}&rdquo;!
-          </p>
         </div>
       )}
 
@@ -99,12 +91,6 @@ export const LessonScreen = () => {
         onProgressChange={setScrubProgress}
         onInteractionStart={tutorial.dismiss}
       />
-
-      <footer className="lesson-screen__footer">
-        <div className="lesson-screen__keyboard-hints">
-          <span>Scrub the word to help {currentAnimal?.name ?? 'the animal'} talk.</span>
-        </div>
-      </footer>
 
       {tutorial.isVisible && <TutorialOverlay onDismiss={tutorial.dismiss} />}
     </div>

@@ -41,16 +41,13 @@ export const ScrubWord = ({
   const [furthestCompleted, setFurthestCompleted] = useState(-1);
   const [progressRatio, setProgressRatio] = useState(0);
   const [isScrubbing, setIsScrubbing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [hasCompletedOnce, setHasCompletedOnce] = useState(false);
 
   // Parse the word into phoneme units
   const parsed = useMemo(() => parseWordToPhonemes(word.text), [word.text]);
-  const { units, missingGraphemes, hasAllAudio } = parsed;
+  const { units } = parsed;
 
   const totalZones = units.length;
-  const activeUnit = activeIndex !== null ? units[activeIndex] : null;
-  const progressPercent = Math.round(progressRatio * 100);
 
   const { preloadPhonemes, playPhoneme, stopAll, resetLastPlayed, resume } =
     useAudioEngine();
@@ -58,30 +55,11 @@ export const ScrubWord = ({
 
   // Preload audio on mount or word change
   useEffect(() => {
-    if (missingGraphemes.length > 0 && !hasAllAudio) {
-      // Only show error if there are missing graphemes and we can't play
-      const playableUnits = units.filter((u) => u.audioFile);
-      if (playableUnits.length === 0) {
-        setError(`No audio available for this word`);
-        return;
-      }
-      // Partial audio - show warning but continue
-      setError(
-        `Partial audio: missing ${missingGraphemes
-          .map((g) => g.toUpperCase())
-          .join(', ')}`,
-      );
-    } else {
-      setError(null);
-    }
-
     const playableUnits = units.filter((u) => u.audioFile);
     if (playableUnits.length > 0) {
-      preloadPhonemes(playableUnits).catch((err) =>
-        setError(`Failed to preload audio: ${err.message}`),
-      );
+      preloadPhonemes(playableUnits).catch(console.error);
     }
-  }, [missingGraphemes, hasAllAudio, preloadPhonemes, units]);
+  }, [preloadPhonemes, units]);
 
   // Reset state when word changes
   useEffect(() => {
@@ -378,68 +356,21 @@ export const ScrubWord = ({
     handlePositionChange,
   ]);
 
-  // Compute visual states for each zone
+  // Compute visual states for each zone - simplified to 3 states
   const zoneStates = useMemo(
     () =>
       units.map<ZoneVisualState>((_unit, index) => {
-        if (index <= furthestCompleted) return 'complete';
         if (index === activeIndex) return 'active';
-        return 'inactive';
+        if (index <= furthestCompleted) return 'done';
+        return 'waiting';
       }),
     [activeIndex, furthestCompleted, units],
   );
 
-  // Generate prompt text
-  const promptText = useMemo(() => {
-    if (hasCompletedOnce) {
-      return '✨ Great job! Try again or go to the next word.';
-    }
-    if (isScrubbing && activeUnit) {
-      if (activeUnit.isSilent) {
-        return 'This letter is silent - keep sliding!';
-      }
-      if (activeUnit.isStop) {
-        return `Quick tap! "${activeUnit.grapheme.toUpperCase()}" is a stop sound.`;
-      }
-      return `"${activeUnit.grapheme.toUpperCase()}" makes the ${activeUnit.label} sound.`;
-    }
-    if (isScrubbing) {
-      return 'Keep sliding to blend all the sounds!';
-    }
-    return '👆 Press and slide across every letter.';
-  }, [activeUnit, hasCompletedOnce, isScrubbing]);
-
   return (
-    <div className="scrub-word-container">
-      <div className="scrub-word__instruction-row">
-        <p className="scrub-word__instruction">
-          Slide to blend every sound.
-        </p>
-        <span
-          className={`scrub-word__status ${
-            isScrubbing ? 'scrub-word__status--active' : ''
-          } ${hasCompletedOnce ? 'scrub-word__status--complete' : ''}`}
-        >
-          {hasCompletedOnce
-            ? '✓ Complete'
-            : isScrubbing
-            ? 'Scrubbing…'
-            : 'Press & hold'}
-        </span>
-      </div>
-
-      {error && (
-        <div
-          className={`scrub-word__error ${
-            hasAllAudio ? '' : 'scrub-word__error--warning'
-          }`}
-        >
-          {error}
-        </div>
-      )}
-
+    <div className="scrub-word-wrapper">
       <div
-        className={`scrub-word ${hasCompletedOnce ? 'scrub-word--complete' : ''}`}
+        className={`scrub-word ${hasCompletedOnce ? 'scrub-word--complete' : ''} ${isScrubbing ? 'scrub-word--scrubbing' : ''}`}
         ref={containerRef}
         role="group"
         aria-label={`Scrubbable word ${word.displayText ?? word.text}`}
@@ -450,9 +381,6 @@ export const ScrubWord = ({
             display={unit.grapheme}
             label={unit.label}
             state={zoneStates[index]}
-            isUnit={unit.isUnit}
-            isStop={unit.isStop}
-            isSilent={unit.isSilent}
             ref={(el) => {
               letterRefs.current[index] = el;
             }}
@@ -460,41 +388,13 @@ export const ScrubWord = ({
         ))}
       </div>
 
-      <div className="scrub-word__track-wrapper" aria-hidden="true">
-        <div className="scrub-word__track">
-          <div
-            className="scrub-word__track-fill"
-            style={{ width: `${progressRatio * 100}%` }}
-          />
-          <div className="scrub-word__track-markers">
-            {units.map((unit, index) => (
-              <span
-                key={`${unit.id}-marker`}
-                className={`scrub-word__track-marker ${
-                  unit.isStop ? 'scrub-word__track-marker--stop' : ''
-                }`}
-                style={{
-                  left:
-                    totalZones <= 1
-                      ? '0%'
-                      : `${(index / (totalZones - 1)) * 100}%`,
-                }}
-              />
-            ))}
-          </div>
-          <div
-            className={`scrub-word__track-indicator ${
-              isScrubbing ? 'is-active' : ''
-            }`}
-            style={{ left: `${progressRatio * 100}%` }}
-          />
+      {/* Simple swipe hint - just an animated hand */}
+      {!isScrubbing && !hasCompletedOnce && (
+        <div className="scrub-word__hint" aria-hidden="true">
+          <span className="scrub-word__hint-hand">👆</span>
+          <span className="scrub-word__hint-arrow">→</span>
         </div>
-      </div>
-
-      <div className="scrub-word__prompt">
-        <p>{promptText}</p>
-        <span className="scrub-word__percent">{progressPercent}%</span>
-      </div>
+      )}
     </div>
   );
 };
