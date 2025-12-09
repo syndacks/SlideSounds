@@ -1,75 +1,87 @@
 import { WordDefinition } from '../types/phoneme';
 
 /**
- * Test words for the phonics app
- * Limited set for audio testing with improved phoneme recordings
+ * Complete MVP word list: 50 words across 8 animals
  *
- * Phonemes needed: c(k), a, t, s, m, p, n
+ * Phase 1: Short A words (Farm animals)
+ * Phase 2: Short E, I, O, U words (Pond animals)
  */
 export const WORDS: WordDefinition[] = [
-  {
-    id: 'cat',
-    text: 'cat',
-    displayText: 'cat',
-    phase: 1,
-  },
-  {
-    id: 'sat',
-    text: 'sat',
-    displayText: 'sat',
-    phase: 1,
-  },
-  {
-    id: 'mat',
-    text: 'mat',
-    displayText: 'mat',
-    phase: 1,
-  },
-  {
-    id: 'pat',
-    text: 'pat',
-    displayText: 'pat',
-    phase: 1,
-  },
-  {
-    id: 'tap',
-    text: 'tap',
-    displayText: 'tap',
-    phase: 1,
-  },
-  {
-    id: 'map',
-    text: 'map',
-    displayText: 'map',
-    phase: 1,
-  },
-  {
-    id: 'sap',
-    text: 'sap',
-    displayText: 'sap',
-    phase: 1,
-  },
-  {
-    id: 'can',
-    text: 'can',
-    displayText: 'can',
-    phase: 1,
-  },
-  {
-    id: 'man',
-    text: 'man',
-    displayText: 'man',
-    phase: 1,
-  },
-  {
-    id: 'pan',
-    text: 'pan',
-    displayText: 'pan',
-    phase: 1,
-  },
+  // ============================================================================
+  // PHASE 1: SHORT A WORDS (Farm)
+  // ============================================================================
+
+  // --- Pig's words ---
+  { id: 'sat', text: 'sat', displayText: 'sat', phase: 1 },
+  { id: 'mat', text: 'mat', displayText: 'mat', phase: 1 },
+  { id: 'pat', text: 'pat', displayText: 'pat', phase: 1 },
+  { id: 'tap', text: 'tap', displayText: 'tap', phase: 1 },
+  { id: 'map', text: 'map', displayText: 'map', phase: 1 },
+
+  // --- Cow's words ---
+  { id: 'sap', text: 'sap', displayText: 'sap', phase: 1 },
+  { id: 'nap', text: 'nap', displayText: 'nap', phase: 1 },
+  { id: 'cap', text: 'cap', displayText: 'cap', phase: 1 },
+  { id: 'can', text: 'can', displayText: 'can', phase: 1 },
+  { id: 'pan', text: 'pan', displayText: 'pan', phase: 1 },
+
+  // --- Cat's words ---
+  { id: 'cat', text: 'cat', displayText: 'cat', phase: 1 },
+  { id: 'man', text: 'man', displayText: 'man', phase: 1 },
+  { id: 'fan', text: 'fan', displayText: 'fan', phase: 1 },
+  { id: 'ran', text: 'ran', displayText: 'ran', phase: 1 },
+  { id: 'tan', text: 'tan', displayText: 'tan', phase: 1 },
+
+  // --- Hen's words ---
+  { id: 'rat', text: 'rat', displayText: 'rat', phase: 1 },
+  { id: 'fat', text: 'fat', displayText: 'fat', phase: 1 },
+  { id: 'hat', text: 'hat', displayText: 'hat', phase: 1 },
+  { id: 'bat', text: 'bat', displayText: 'bat', phase: 1 },
+  { id: 'van', text: 'van', displayText: 'van', phase: 1 },
+
+  // ============================================================================
+  // PHASE 2: SHORT E WORDS (Pond - Frog)
+  // ============================================================================
+  { id: 'pet', text: 'pet', displayText: 'pet', phase: 2 },
+  { id: 'set', text: 'set', displayText: 'set', phase: 2 },
+  { id: 'net', text: 'net', displayText: 'net', phase: 2 },
+  { id: 'met', text: 'met', displayText: 'met', phase: 2 },
+  { id: 'wet', text: 'wet', displayText: 'wet', phase: 2 },
+
+  // ============================================================================
+  // PHASE 2: SHORT I WORDS (Pond - Duck)
+  // ============================================================================
+  { id: 'sit', text: 'sit', displayText: 'sit', phase: 2 },
+  { id: 'pit', text: 'pit', displayText: 'pit', phase: 2 },
+  { id: 'fin', text: 'fin', displayText: 'fin', phase: 2 },
+  { id: 'pin', text: 'pin', displayText: 'pin', phase: 2 },
+  { id: 'win', text: 'win', displayText: 'win', phase: 2 },
+
+  // ============================================================================
+  // PHASE 2: SHORT O WORDS (Pond - Fish)
+  // ============================================================================
+  { id: 'pot', text: 'pot', displayText: 'pot', phase: 2 },
+  { id: 'not', text: 'not', displayText: 'not', phase: 2 },
+  { id: 'mop', text: 'mop', displayText: 'mop', phase: 2 },
+  { id: 'top', text: 'top', displayText: 'top', phase: 2 },
+  { id: 'hot', text: 'hot', displayText: 'hot', phase: 2 },
+
+  // ============================================================================
+  // PHASE 2: SHORT U WORDS (Pond - Turtle)
+  // ============================================================================
+  { id: 'cup', text: 'cup', displayText: 'cup', phase: 2 },
+  { id: 'sun', text: 'sun', displayText: 'sun', phase: 2 },
+  { id: 'fun', text: 'fun', displayText: 'fun', phase: 2 },
+  { id: 'nut', text: 'nut', displayText: 'nut', phase: 2 },
+  { id: 'cut', text: 'cut', displayText: 'cut', phase: 2 },
+  { id: 'run', text: 'run', displayText: 'run', phase: 2 },
+  { id: 'pup', text: 'pup', displayText: 'pup', phase: 2 },
+  { id: 'mud', text: 'mud', displayText: 'mud', phase: 2 },
+  { id: 'hut', text: 'hut', displayText: 'hut', phase: 2 },
+  { id: 'bus', text: 'bus', displayText: 'bus', phase: 2 },
 ];
 
-export const DEFAULT_LESSON_WORD_ID = 'cat';
+export const DEFAULT_LESSON_WORD_ID = 'sat';
 
 /**
  * Get a word by ID

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCheckForWord } from '../data/comprehensionChecks';
 import { getWordById } from '../data/words';
-import { getPigAnimal, useGameStore } from '../stores/gameStore';
+import { getAnimalById } from '../data/animals';
+import { useGameStore } from '../stores/gameStore';
 import { useWordAudio } from '../hooks/useWordAudio';
 import { AnimalAvatar } from '../components/AnimalAvatar';
 import { useAnimalState } from '../hooks/useAnimalState';
@@ -18,7 +19,8 @@ export const ComprehensionCheckScreen = () => {
     () => new Set(),
   );
 
-  const pig = getPigAnimal();
+  const currentAnimalId = useGameStore((state) => state.currentAnimalId);
+  const currentAnimal = currentAnimalId ? getAnimalById(currentAnimalId) : undefined;
   const markWordCompleted = useGameStore((state) => state.markWordCompleted);
   const getNextWordForCurrentAnimal = useGameStore(
     (state) => state.getNextWordForCurrentAnimal,
@@ -44,15 +46,15 @@ export const ComprehensionCheckScreen = () => {
   }, [check]);
 
   const handleBack = () => {
-    if (pig) {
-      navigate(`/lesson/${pig.id}`);
+    if (currentAnimal) {
+      navigate(`/lesson/${currentAnimal.id}`);
     } else {
       navigate('/');
     }
   };
 
   const handleOptionClick = (optionId: string) => {
-    if (!check || !pig || optionState === 'correct' || optionState === 'selecting') return;
+    if (!check || !currentAnimal || optionState === 'correct' || optionState === 'selecting') return;
     setSelectedId(optionId);
     setOptionState('selecting');
 
@@ -64,9 +66,9 @@ export const ComprehensionCheckScreen = () => {
       window.setTimeout(() => {
         if (nextId) {
           useGameStore.getState().setCurrentWordId(nextId);
-          navigate(`/lesson/${pig.id}`);
+          navigate(`/lesson/${currentAnimal.id}`);
         } else {
-          navigate(`/celebration/${pig.id}`);
+          navigate(`/celebration/${currentAnimal.id}`);
         }
       }, 1000);
       return;
@@ -93,7 +95,7 @@ export const ComprehensionCheckScreen = () => {
     return () => window.clearTimeout(timeout);
   }, [hasWordAudio, playWordAudio, targetWord?.id]);
 
-  if (!wordId || !check || !targetWord || !pig) {
+  if (!wordId || !check || !targetWord || !currentAnimal) {
     return (
       <div className="screen shell-screen">
         <header className="shell-screen__header">
@@ -120,8 +122,8 @@ export const ComprehensionCheckScreen = () => {
 
       <main className="shell-screen__content">
         <div className="check-screen__top">
-          {pig && (
-            <AnimalAvatar animal={pig} state={avatarState} size="medium" />
+          {currentAnimal && (
+            <AnimalAvatar animal={currentAnimal} state={avatarState} size="medium" />
           )}
           <p className="check-screen__prompt">
             Which one is <span className="check-screen__word">&apos;{targetWord.text}&apos;</span>?

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ScrubWord } from '../components/ScrubWord';
 import { getWordById } from '../data/words';
 import { getAnimalById } from '../data/animals';
+import { getHabitatByAnimalId } from '../data/habitats';
 import { AnimalAvatar } from '../components/AnimalAvatar';
 import { useAnimalState } from '../hooks/useAnimalState';
 import { TutorialOverlay } from '../components/TutorialOverlay';
@@ -39,7 +40,8 @@ export const LessonScreen = () => {
   }, [animalId, currentWordId, navigate]);
 
   const handleBack = () => {
-    navigate('/animals/farm');
+    const habitat = animalId ? getHabitatByAnimalId(animalId) : undefined;
+    navigate(`/animals/${habitat?.id ?? 'farm'}`);
   };
 
   const handleComplete = () => {
@@ -100,7 +102,7 @@ export const LessonScreen = () => {
 
       <footer className="lesson-screen__footer">
         <div className="lesson-screen__keyboard-hints">
-          <span>Scrub the word to help Pig talk.</span>
+          <span>Scrub the word to help {currentAnimal?.name ?? 'the animal'} talk.</span>
         </div>
       </footer>
 

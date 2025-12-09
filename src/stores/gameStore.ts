@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ANIMALS, getAnimalById } from '../data/animals';
+import { getAnimalById } from '../data/animals';
 import { loadProgress, markWordComplete as persistWordComplete } from '../lib/progressStorage';
 
 type AnimalId = string;
@@ -170,8 +170,3 @@ export const useWordNavigation = () => {
     hasPrevious: currentIndex > 0,
   };
 };
-
-/**
- * Convenience helper to get the single pig animal used in the MVP.
- */
-export const getPigAnimal = () => ANIMALS.find((animal) => animal.id === 'pig');

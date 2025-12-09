@@ -152,73 +152,152 @@
   cursor: pointer;
 }
 
-/* Habitat card */
+/* Habitat grid and card */
+
+.habitat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 700px;
+}
 
 .habitat-card {
   width: 100%;
-  max-width: 360px;
   border-radius: 20px;
-  padding: 20px;
+  padding: 24px 20px;
   border: 2px solid #e0e5f0;
-  background: #f8fbff;
+  background: linear-gradient(145deg, #f8fbff 0%, #fff8f2 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.habitat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 35px rgba(31, 42, 68, 0.12);
+  border-color: #ffb347;
 }
 
 .habitat-card__emoji {
-  font-size: 2.4rem;
+  font-size: 3rem;
+  margin-bottom: 4px;
 }
 
 .habitat-card__name {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
+  color: #2a3658;
+}
+
+.habitat-card__description {
+  font-size: 0.9rem;
+  color: #5a6fa8;
+  text-align: center;
 }
 
 .habitat-card__progress {
-  font-size: 0.9rem;
-  color: #4d5b86;
+  font-size: 0.85rem;
+  color: #7685b3;
+  margin-top: 4px;
 }
 
-/* Animal card */
+/* Animal select prompt */
+
+.animal-select__prompt {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #4d5b86;
+  text-align: center;
+}
+
+/* Animal grid and card */
+
+.animal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 700px;
+}
 
 .animal-card {
   width: 100%;
-  max-width: 360px;
   border-radius: 20px;
-  padding: 20px;
+  padding: 20px 16px;
   border: 2px solid #e0e5f0;
-  background: #f8fbff;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fbff 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.animal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(31, 42, 68, 0.1);
+}
+
+.animal-card--complete {
+  border-color: #7ddc93;
+  background: linear-gradient(145deg, #f0fff4 0%, #e8f9e6 100%);
 }
 
 .animal-card__emoji {
-  font-size: 2.8rem;
+  font-size: 2.6rem;
+  margin-bottom: 2px;
 }
 
 .animal-card__name {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
+  color: #2a3658;
 }
 
 .animal-card__progress {
-  font-size: 0.9rem;
-  color: #4d5b86;
+  font-size: 0.85rem;
+  color: #5a6fa8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.animal-card__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4caf50;
+  color: white;
+  font-size: 0.7rem;
 }
 
 .animal-card__button {
   margin-top: 8px;
-  padding: 10px 24px;
+  padding: 10px 20px;
   border-radius: 999px;
   border: none;
-  background: #ffd36d;
+  background: linear-gradient(135deg, #ffd36d, #ffb347);
   font-weight: 700;
+  font-size: 0.9rem;
   cursor: pointer;
+  color: #2a2f4f;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.animal-card__button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(255, 179, 71, 0.35);
+}
+
+.animal-card--complete .animal-card__button {
+  background: linear-gradient(135deg, #7ddc93, #5fbe6b);
 }
 
 /* Comprehension check */
