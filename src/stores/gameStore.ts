@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { getAnimalById } from '../data/animals';
-import { loadProgress, markWordComplete as persistWordComplete } from '../lib/progressStorage';
+import { loadProgress, markWordComplete as persistWordComplete, resetProgress } from '../lib/progressStorage';
 
 type AnimalId = string;
 type WordId = string;
@@ -44,6 +44,9 @@ interface GameState {
 
   /** Reset all completed words for an animal (used for "Play Again") */
   resetAnimalProgress: (animalId: AnimalId) => void;
+
+  /** Reset all progress (localStorage and in-memory state) */
+  resetAllProgress: () => void;
 }
 
 const initialCompletedWords = new Set<WordId>(loadProgress().completedWords);
@@ -153,6 +156,18 @@ export const useGameStore = create<GameState>((set, get) => ({
     animal.words.forEach((id) => nextCompleted.delete(id));
     // Do not clear storage here; ComprehensionCheck will write new progress as words are re-completed.
     set({ completedWords: nextCompleted });
+  },
+
+  resetAllProgress: () => {
+    // Clear localStorage
+    resetProgress();
+
+    // Reset in-memory state
+    set({
+      completedWords: new Set<WordId>(),
+      currentAnimalId: null,
+      currentWordId: null,
+    });
   },
 }));
 

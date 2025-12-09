@@ -35,6 +35,16 @@ export const HomeScreen = () => {
     navigate('/habitats');
   };
 
+  const handleReset = () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to reset all progress? This will erase all completed words and start fresh. This cannot be undone.'
+    );
+
+    if (confirmed) {
+      useGameStore.getState().resetAllProgress();
+    }
+  };
+
   return (
     <div className="home-screen">
       <header className="home-screen__header">
@@ -77,6 +87,14 @@ export const HomeScreen = () => {
 
         <button className="home-screen__play-button" type="button" onClick={handlePlay}>
           🏠 PLAY!
+        </button>
+
+        <button
+          className="home-screen__reset-button"
+          type="button"
+          onClick={handleReset}
+        >
+          🔄 Reset Progress
         </button>
       </main>
     </div>
