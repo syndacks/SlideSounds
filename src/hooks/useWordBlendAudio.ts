@@ -154,5 +154,6 @@ export const useWordBlendAudio = (wordId: string, units: PhonemeUnit[]) => {
     isBuilding,
     error: buildError,
     audioSource,
+    duration: wordAudio?.duration ?? null,
   };
 };

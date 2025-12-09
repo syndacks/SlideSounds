@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getCheckForWord } from '../data/comprehensionChecks';
 import { getWordById } from '../data/words';
 import { getAnimalById } from '../data/animals';
@@ -9,9 +9,11 @@ import { AnimalAvatar } from '../components/AnimalAvatar';
 import { useAnimalState } from '../hooks/useAnimalState';
 
 type OptionState = 'idle' | 'selecting' | 'correct' | 'incorrect';
+const CHECK_AUTO_PLAY_DELAY_MS = 1500;
 
 export const ComprehensionCheckScreen = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { wordId } = useParams<{ wordId: string }>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [optionState, setOptionState] = useState<OptionState>('idle');
@@ -29,7 +31,11 @@ export const ComprehensionCheckScreen = () => {
   const check = wordId ? getCheckForWord(wordId) : undefined;
   const targetWord = wordId ? getWordById(wordId) : undefined;
   const { play: playWordAudio, isLoading: isAudioLoading, hasAudio: hasWordAudio } =
-    useWordAudio(targetWord);
+    useWordAudio(targetWord, {
+      autoPlayOnReady: true,
+      autoPlayDelay: CHECK_AUTO_PLAY_DELAY_MS,
+      autoPlaySessionKey: location.key,
+    });
   const avatarState = useAnimalState(1);
 
   useEffect(() => {
@@ -86,14 +92,6 @@ export const ComprehensionCheckScreen = () => {
       setSelectedId(null);
     }, 800);
   };
-
-  useEffect(() => {
-    if (!targetWord || !hasWordAudio) return;
-    const timeout = window.setTimeout(() => {
-      void playWordAudio();
-    }, 500);
-    return () => window.clearTimeout(timeout);
-  }, [hasWordAudio, playWordAudio, targetWord?.id]);
 
   if (!wordId || !check || !targetWord || !currentAnimal) {
     return (

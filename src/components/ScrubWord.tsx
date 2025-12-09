@@ -1,15 +1,7 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { parseWordToPhonemes } from '../lib/wordParser';
 import { WordDefinition } from '../types/phoneme';
 import { useAudioEngine } from '../hooks/useAudioEngine';
-import { useWordBlendAudio } from '../hooks/useWordBlendAudio';
 import { LetterZone, ZoneVisualState } from './LetterZone';
 
 interface ZoneRect {
@@ -22,6 +14,7 @@ interface ScrubWordProps {
   onComplete?: () => void;
   onProgressChange?: (ratio: number) => void;
   onInteractionStart?: () => void;
+  isWordAudioReady?: boolean;
 }
 
 export const ScrubWord = ({
@@ -29,6 +22,7 @@ export const ScrubWord = ({
   onComplete,
   onProgressChange,
   onInteractionStart,
+  isWordAudioReady = true,
 }: ScrubWordProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const letterRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -36,6 +30,7 @@ export const ScrubWord = ({
   const lastZoneRef = useRef<number | null>(null);
   const isDraggingRef = useRef(false);
   const stopPlayedRef = useRef<Set<number>>(new Set());
+  const pendingCompletionRef = useRef(false);
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [furthestCompleted, setFurthestCompleted] = useState(-1);
@@ -51,7 +46,6 @@ export const ScrubWord = ({
 
   const { preloadPhonemes, playPhoneme, stopAll, resetLastPlayed, resume } =
     useAudioEngine();
-  const { playBlend, isReady: isBlendReady } = useWordBlendAudio(word.id, units);
 
   // Preload audio on mount or word change
   useEffect(() => {
@@ -69,6 +63,7 @@ export const ScrubWord = ({
     setHasCompletedOnce(false);
     stopPlayedRef.current.clear();
     resetLastPlayed();
+    pendingCompletionRef.current = false;
   }, [word.id, resetLastPlayed]);
 
   // Initialize letter refs
@@ -183,11 +178,8 @@ export const ScrubWord = ({
     );
 
     // Check if user completed the word (got to 80%+ and touched last zone)
-    const shouldPlayBlend =
-      totalZones > 0 &&
-      completedIndex >= totalZones - 1 &&
-      progressRatio > 0.8 &&
-      isBlendReady;
+    const didCompleteWord =
+      totalZones > 0 && completedIndex >= totalZones - 1 && progressRatio > 0.8;
 
     // Stop any playing sounds
     stopAll(100);
@@ -205,25 +197,36 @@ export const ScrubWord = ({
     setActiveIndex(null);
     resetLastPlayed();
 
-    // Play blended word if completed
-    if (shouldPlayBlend) {
-      setHasCompletedOnce(true);
-      // Small delay before playing blend
-      setTimeout(() => {
-        void playBlend();
+    // Report completion when word audio is ready
+    if (didCompleteWord) {
+      if (isWordAudioReady) {
+        pendingCompletionRef.current = false;
+        setHasCompletedOnce(true);
         onComplete?.();
-      }, 150);
+      } else {
+        pendingCompletionRef.current = true;
+      }
     }
   }, [
     furthestCompleted,
-    isBlendReady,
-    playBlend,
+    isWordAudioReady,
     progressRatio,
     totalZones,
     stopAll,
     resetLastPlayed,
     onComplete,
   ]);
+
+  // If the learner already completed the scrub while audio was still loading,
+  // automatically fire completion once the word audio becomes ready.
+  useEffect(() => {
+    if (!isWordAudioReady || !pendingCompletionRef.current) {
+      return;
+    }
+    pendingCompletionRef.current = false;
+    setHasCompletedOnce(true);
+    onComplete?.();
+  }, [isWordAudioReady, onComplete]);
 
   useEffect(() => {
     onProgressChange?.(progressRatio);

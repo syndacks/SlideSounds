@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ScrubWord } from '../components/ScrubWord';
 import { getWordById } from '../data/words';
@@ -9,6 +9,7 @@ import { useAnimalState } from '../hooks/useAnimalState';
 import { TutorialOverlay } from '../components/TutorialOverlay';
 import { useTutorialState } from '../hooks/useTutorialState';
 import { useGameStore, useWordNavigation } from '../stores/gameStore';
+import { useWordAudio } from '../hooks/useWordAudio';
 
 export const LessonScreen = () => {
   const navigate = useNavigate();
@@ -23,6 +24,14 @@ export const LessonScreen = () => {
   const [scrubProgress, setScrubProgress] = useState(0);
   const avatarState = useAnimalState(scrubProgress);
   const tutorial = useTutorialState();
+  const [isListeningToWord, setIsListeningToWord] = useState(false);
+  const playbackTimeoutRef = useRef<number | null>(null);
+
+  const {
+    play: playWordAudio,
+    hasAudio: hasWordAudio,
+    duration: wordAudioDuration,
+  } = useWordAudio(word);
 
   useEffect(() => {
     if (!animalId) {
@@ -45,12 +54,32 @@ export const LessonScreen = () => {
   };
 
   const handleComplete = () => {
-    if (!currentWordId) return;
-    navigate(`/check/${currentWordId}`);
+    if (!currentWordId || isListeningToWord) return;
+    setIsListeningToWord(true);
+    void playWordAudio();
+
+    const durationMs = Math.max(800, (wordAudioDuration ?? 1.1) * 1000 + 200);
+    playbackTimeoutRef.current = window.setTimeout(() => {
+      navigate(`/check/${currentWordId}`);
+    }, durationMs);
   };
 
   useEffect(() => {
+    return () => {
+      if (playbackTimeoutRef.current) {
+        window.clearTimeout(playbackTimeoutRef.current);
+        playbackTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     setScrubProgress(0);
+    setIsListeningToWord(false);
+    if (playbackTimeoutRef.current) {
+      window.clearTimeout(playbackTimeoutRef.current);
+      playbackTimeoutRef.current = null;
+    }
   }, [word?.id]);
 
   if (!word) {
@@ -90,6 +119,7 @@ export const LessonScreen = () => {
         onComplete={handleComplete}
         onProgressChange={setScrubProgress}
         onInteractionStart={tutorial.dismiss}
+        isWordAudioReady={hasWordAudio}
       />
 
       {tutorial.isVisible && <TutorialOverlay onDismiss={tutorial.dismiss} />}
