@@ -88,7 +88,6 @@ export const AnimalAvatar = memo(
           )}
         </div>
         <div className="animal-avatar__name">{animal.name}</div>
-        <div className="animal-avatar__status">{statusLabel}</div>
       </div>
     );
   },

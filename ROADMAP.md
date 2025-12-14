@@ -112,7 +112,7 @@ Goal: Support parents and iteration with **basic insight and controls**.
   - Difficulty tweaks (e.g., 2 vs 3 options in comprehension).
 - Analytics (local and/or remote):
   - Instrument the core events from the MVP spec (scrub start/completion, comprehension correct/incorrect, phase unlocks).
-  - Ensure analytics code respects offline‑first design and can be disabled for local dev.
+  - Ensure analytics code respects offline‑first design and can be hatdisabled for local dev.
 
 _Status: Not started – dependent on Phase 2 data structures._
 

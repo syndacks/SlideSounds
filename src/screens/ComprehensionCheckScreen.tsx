@@ -209,7 +209,7 @@ export const ComprehensionCheckScreen = () => {
             void playWordAudio();
           }}
         >
-          {isAudioLoading ? 'Loading audio…' : '🔊 Hear Again'}
+          {isAudioLoading ? 'Loading sound…' : '🔊 Tap to Hear'}
         </button>
       </main>
     </div>

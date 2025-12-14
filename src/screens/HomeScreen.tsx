@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ANIMALS } from '../data/animals';
 import { useGameStore } from '../stores/gameStore';
+import { ResetProgressDialog } from '../components/ResetProgressDialog';
 
 /**
  * Calculate total progress across all animals.
@@ -22,6 +24,7 @@ function useTotalProgress() {
 
 export const HomeScreen = () => {
   const navigate = useNavigate();
+  const [isResetDialogOpen, setResetDialogOpen] = useState(false);
   const progress = useTotalProgress();
   const devToolsEnabled = useGameStore((state) => state.devToolsEnabled);
   const toggleDevTools = useGameStore((state) => state.toggleDevTools);
@@ -38,13 +41,16 @@ export const HomeScreen = () => {
   };
 
   const handleReset = () => {
-    const confirmed = window.confirm(
-      'Are you sure you want to reset all progress? This will erase all completed words and start fresh. This cannot be undone.'
-    );
+    setResetDialogOpen(true);
+  };
 
-    if (confirmed) {
-      useGameStore.getState().resetAllProgress();
-    }
+  const handleDismissResetDialog = () => {
+    setResetDialogOpen(false);
+  };
+
+  const handleConfirmReset = () => {
+    useGameStore.getState().resetAllProgress();
+    setResetDialogOpen(false);
   };
 
   return (
@@ -111,6 +117,11 @@ export const HomeScreen = () => {
           </button>
         )}
       </main>
+      <ResetProgressDialog
+        isOpen={isResetDialogOpen}
+        onCancel={handleDismissResetDialog}
+        onConfirm={handleConfirmReset}
+      />
     </div>
   );
 };

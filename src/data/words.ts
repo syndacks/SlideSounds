@@ -23,6 +23,63 @@ const PIG_WORD_IMAGES: Record<string, WordDefinition['image']> = {
   },
 };
 
+const COW_WORD_IMAGES: Record<string, WordDefinition['image']> = {
+  sap: {
+    src: '/images/sap.png',
+    alt: 'Illustration of golden tree sap dripping down a trunk into a bucket.',
+  },
+  nap: {
+    src: '/images/nap.png',
+    alt: 'Illustration of a child napping peacefully on a pillow.',
+  },
+  cap: {
+    src: '/images/cap.png',
+    alt: 'Illustration of a colorful baseball cap on its own.',
+  },
+  can: {
+    src: '/images/can.png',
+    alt: 'Illustration of a simple silver tin can.',
+  },
+  pan: {
+    src: '/images/pan.png',
+    alt: 'Illustration of a frying pan with a handle from a slight angle.',
+  },
+};
+
+const CAT_WORD_IMAGES: Record<string, WordDefinition['image']> = {
+  cat: {
+    src: '/images/cat.png',
+    alt: 'Illustration of a friendly orange tabby cat stretching.',
+  },
+  man: {
+    src: '/images/man.png',
+    alt: 'Illustration of a smiling person waving.',
+  },
+  fan: {
+    src: '/images/fan.png',
+    alt: 'Illustration of a handheld paper fan with bright colors.',
+  },
+  ran: {
+    src: '/images/ran.png',
+    alt: 'Illustration of a child running joyfully across grass.',
+  },
+};
+
+const HEN_WORD_IMAGES: Record<string, WordDefinition['image']> = {
+  rat: {
+    src: '/images/rat.png',
+    alt: 'Illustration of a cartoon rat with pink ears holding cheese.',
+  },
+  fat: {
+    src: '/images/fat.png',
+    alt: 'Illustration of a round balloon representing the idea of fat.',
+  },
+  hat: {
+    src: '/images/hat.png',
+    alt: 'Illustration of a colorful hat with a feather.',
+  },
+};
+
 /**
  * Complete MVP word list: 50 words across 8 animals
  *
@@ -42,23 +99,23 @@ export const WORDS: WordDefinition[] = [
   { id: 'map', text: 'map', displayText: 'map', phase: 1, image: PIG_WORD_IMAGES.map },
 
   // --- Cow's words ---
-  { id: 'sap', text: 'sap', displayText: 'sap', phase: 1 },
-  { id: 'nap', text: 'nap', displayText: 'nap', phase: 1 },
-  { id: 'cap', text: 'cap', displayText: 'cap', phase: 1 },
-  { id: 'can', text: 'can', displayText: 'can', phase: 1 },
-  { id: 'pan', text: 'pan', displayText: 'pan', phase: 1 },
+  { id: 'sap', text: 'sap', displayText: 'sap', phase: 1, image: COW_WORD_IMAGES.sap },
+  { id: 'nap', text: 'nap', displayText: 'nap', phase: 1, image: COW_WORD_IMAGES.nap },
+  { id: 'cap', text: 'cap', displayText: 'cap', phase: 1, image: COW_WORD_IMAGES.cap },
+  { id: 'can', text: 'can', displayText: 'can', phase: 1, image: COW_WORD_IMAGES.can },
+  { id: 'pan', text: 'pan', displayText: 'pan', phase: 1, image: COW_WORD_IMAGES.pan },
 
   // --- Cat's words ---
-  { id: 'cat', text: 'cat', displayText: 'cat', phase: 1 },
-  { id: 'man', text: 'man', displayText: 'man', phase: 1 },
-  { id: 'fan', text: 'fan', displayText: 'fan', phase: 1 },
-  { id: 'ran', text: 'ran', displayText: 'ran', phase: 1 },
+  { id: 'cat', text: 'cat', displayText: 'cat', phase: 1, image: CAT_WORD_IMAGES.cat },
+  { id: 'man', text: 'man', displayText: 'man', phase: 1, image: CAT_WORD_IMAGES.man },
+  { id: 'fan', text: 'fan', displayText: 'fan', phase: 1, image: CAT_WORD_IMAGES.fan },
+  { id: 'ran', text: 'ran', displayText: 'ran', phase: 1, image: CAT_WORD_IMAGES.ran },
   { id: 'tan', text: 'tan', displayText: 'tan', phase: 1 },
 
   // --- Hen's words ---
-  { id: 'rat', text: 'rat', displayText: 'rat', phase: 1 },
-  { id: 'fat', text: 'fat', displayText: 'fat', phase: 1 },
-  { id: 'hat', text: 'hat', displayText: 'hat', phase: 1 },
+  { id: 'rat', text: 'rat', displayText: 'rat', phase: 1, image: HEN_WORD_IMAGES.rat },
+  { id: 'fat', text: 'fat', displayText: 'fat', phase: 1, image: HEN_WORD_IMAGES.fat },
+  { id: 'hat', text: 'hat', displayText: 'hat', phase: 1, image: HEN_WORD_IMAGES.hat },
   { id: 'bat', text: 'bat', displayText: 'bat', phase: 1 },
   { id: 'van', text: 'van', displayText: 'van', phase: 1 },
 
