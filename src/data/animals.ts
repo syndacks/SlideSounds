@@ -1,3 +1,7 @@
+import type { AnimalAvatarState } from '../hooks/useAnimalState';
+
+export type AnimalAvatarImages = Partial<Record<AnimalAvatarState, string>>;
+
 export interface Animal {
   id: string;
   name: string;
@@ -7,6 +11,10 @@ export interface Animal {
    * Ordered list of word IDs for this animal's lesson.
    */
   words: string[];
+  /**
+   * Optional per-state artwork used for the avatar.
+   */
+  avatarImages?: AnimalAvatarImages;
 }
 
 export const ANIMALS: Animal[] = [
@@ -19,6 +27,13 @@ export const ANIMALS: Animal[] = [
     emoji: '🐷',
     habitat: 'farm',
     words: ['sat', 'mat', 'pat', 'tap', 'map'],
+    avatarImages: {
+      sleeping: '/images/pig_sleeping.png',
+      stirring: '/images/pig_sleeping.png',
+      waking: '/images/pig_waking.png',
+      awake: '/images/pig_awake.png',
+      celebrating: '/images/pig_celebrating.png',
+    },
   },
   {
     id: 'cow',

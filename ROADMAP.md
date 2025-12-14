@@ -30,11 +30,12 @@ For full design detail, see:
   - Web Audio–based engine (`src/hooks/useAudioEngine.ts`) with phoneme library mapped in `src/data/phonemeMap.ts`.
   - Word‑level audio supported when available; otherwise blended phoneme output.
 - **Comprehension check**
-  - Per‑word distractors defined in `src/data/comprehensionChecks.ts` (phonetically similar).
-  - UI: text‑based options with visual feedback; word audio via `useWordAudio`.
+  - Per-word distractors defined in `src/data/comprehensionChecks.ts` (phonetically similar).
+  - Option cards render a picture + word label whenever `WordDefinition.image` exists (Pig’s set ships in `/public/images`); otherwise they fall back to the legacy text-only treatment. Word audio still routes through `useWordAudio`.
 - **UX + scaffolding**
-  - Animal avatar that reacts to scrub progress (`AnimalAvatar`, `useAnimalState`).
-  - Simple first‑run tutorial overlay for scrubbing (`TutorialOverlay`, `useTutorialState`).
+  - Animal avatar reacts to scrub progress (`AnimalAvatar`, `useAnimalState`) and now supports per-state artwork (Pig uses dedicated `pig_{state}.png` files; other animals continue to use emoji).
+  - Simple first-run tutorial overlay for scrubbing (`TutorialOverlay`, `useTutorialState`).
+  - Home screen exposes a DEV-only toggle for the Scrub Dev Panel so the helpers stay opt-in even in development builds (`useGameStore.devToolsEnabled`).
 
 ---
 
@@ -85,16 +86,16 @@ Goal: Replace placeholder visuals/audio with the **phonics adventure fantasy**: 
 
 - Word images for comprehension:
   - Generate or source 50 word images and store them as `images/words/{wordId}.png` (or similar).
-  - Extend `ComprehensionCheckScreen` to show image + word label in each option card.
+  - Extend `ComprehensionCheckScreen` to show image + word label in each option card. (Pig’s five words are fully wired; other words still need assets.)
   - Maintain the existing distractor logic; only the visuals change.
 - Animal & celebration polish:
-  - Refine AnimalAvatar states and animations to better match the wake‑up / celebration beats from the spec.
-  - Increase juice on the Celebration screen (stars, confetti, “Play again” affordance).
-- Voice‑over:
+  - Refine AnimalAvatar states and animations to better match the wake-up / celebration beats from the spec. (Pig now swaps between custom state art and gains a celebratory glow; remaining animals still rely on emoji.)
+  - Increase juice on the Celebration screen (stars, confetti, “Play again” affordance). (First pass landed with layered confetti, animated word chips, and pulsing CTAs; future passes may add VO timing.)
+- Voice-over:
   - Define a minimal VO set (intros, “Which one is…?”, correct/incorrect feedback, session start/end).
   - Wire VO playback around key events (enter lesson, enter check, correct/incorrect choice).
 
-_Status: Not started – blocked mainly on asset decisions/creation._
+_Status: In progress – Pig vertical slice (images + avatar art + celebration polish) is in code; remaining words/animals + VO still pending._
 
 ---
 
@@ -124,4 +125,3 @@ These are explicitly **not** on the current roadmap but are documented for later
 - **Continuous single‑buffer scrubbing** using whole‑word audio and timestamp anchors (see `scrub-engine-phase1.md`, `scrub-engine-phase2-plan.md`).
 - Additional habitats beyond Farm + Pond and more advanced phonics patterns (digraphs, welded sounds beyond the MVP set).
 - Multi‑child profiles, cloud sync, and richer achievements/badges.
-

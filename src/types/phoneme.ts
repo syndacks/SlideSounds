@@ -46,6 +46,13 @@ export interface PhonemeUnit {
   durationMs?: number;
 }
 
+export interface WordImage {
+  /** Path to the illustrative asset (from /public) */
+  src: string;
+  /** Accessible description of the illustration */
+  alt?: string;
+}
+
 export interface WordDefinition {
   id: string;
   text: string;
@@ -54,6 +61,8 @@ export interface WordDefinition {
   phonemes?: string[];
   /** Phase this word belongs to */
   phase?: number;
+  /** Optional picture used for comprehension checks */
+  image?: WordImage;
 }
 
 export interface ParsedWord {

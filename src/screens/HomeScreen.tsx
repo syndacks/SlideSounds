@@ -23,6 +23,8 @@ function useTotalProgress() {
 export const HomeScreen = () => {
   const navigate = useNavigate();
   const progress = useTotalProgress();
+  const devToolsEnabled = useGameStore((state) => state.devToolsEnabled);
+  const toggleDevTools = useGameStore((state) => state.toggleDevTools);
 
   // Calculate how many animals are fully complete
   const getAnimalProgress = useGameStore((state) => state.getAnimalProgress);
@@ -96,6 +98,18 @@ export const HomeScreen = () => {
         >
           🔄 Reset Progress
         </button>
+
+        {import.meta.env.DEV && (
+          <button
+            className={`home-screen__dev-toggle${
+              devToolsEnabled ? ' home-screen__dev-toggle--active' : ''
+            }`}
+            type="button"
+            onClick={toggleDevTools}
+          >
+            🛠️ Dev Tools {devToolsEnabled ? 'On' : 'Off'}
+          </button>
+        )}
       </main>
     </div>
   );

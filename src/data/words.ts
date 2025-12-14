@@ -1,5 +1,28 @@
 import { WordDefinition } from '../types/phoneme';
 
+const PIG_WORD_IMAGES: Record<string, WordDefinition['image']> = {
+  sat: {
+    src: '/images/sat.jpeg',
+    alt: 'Illustration of a child sitting on a mat for the word sat.',
+  },
+  mat: {
+    src: '/images/mat.jpeg',
+    alt: 'Illustration of a welcome mat showing the word mat.',
+  },
+  pat: {
+    src: '/images/pat.png',
+    alt: 'Illustration of a friendly hand patting a pig to show pat.',
+  },
+  tap: {
+    src: '/images/tap.png',
+    alt: 'Illustration of a water tap to depict the word tap.',
+  },
+  map: {
+    src: '/images/map.png',
+    alt: 'Illustration of a treasure map representing the word map.',
+  },
+};
+
 /**
  * Complete MVP word list: 50 words across 8 animals
  *
@@ -12,11 +35,11 @@ export const WORDS: WordDefinition[] = [
   // ============================================================================
 
   // --- Pig's words ---
-  { id: 'sat', text: 'sat', displayText: 'sat', phase: 1 },
-  { id: 'mat', text: 'mat', displayText: 'mat', phase: 1 },
-  { id: 'pat', text: 'pat', displayText: 'pat', phase: 1 },
-  { id: 'tap', text: 'tap', displayText: 'tap', phase: 1 },
-  { id: 'map', text: 'map', displayText: 'map', phase: 1 },
+  { id: 'sat', text: 'sat', displayText: 'sat', phase: 1, image: PIG_WORD_IMAGES.sat },
+  { id: 'mat', text: 'mat', displayText: 'mat', phase: 1, image: PIG_WORD_IMAGES.mat },
+  { id: 'pat', text: 'pat', displayText: 'pat', phase: 1, image: PIG_WORD_IMAGES.pat },
+  { id: 'tap', text: 'tap', displayText: 'tap', phase: 1, image: PIG_WORD_IMAGES.tap },
+  { id: 'map', text: 'map', displayText: 'map', phase: 1, image: PIG_WORD_IMAGES.map },
 
   // --- Cow's words ---
   { id: 'sap', text: 'sap', displayText: 'sap', phase: 1 },

@@ -47,6 +47,13 @@ interface GameState {
 
   /** Reset all progress (localStorage and in-memory state) */
   resetAllProgress: () => void;
+
+  /** Whether developer helpers (anchor overrides, etc.) are shown */
+  devToolsEnabled: boolean;
+  /** Toggle developer helpers */
+  toggleDevTools: () => void;
+  /** Explicitly set dev tools flag */
+  setDevTools: (enabled: boolean) => void;
 }
 
 const initialCompletedWords = new Set<WordId>(loadProgress().completedWords);
@@ -55,6 +62,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   currentAnimalId: null,
   currentWordId: null,
   completedWords: initialCompletedWords,
+  devToolsEnabled: false,
 
   setCurrentAnimal: (animalId) => {
     const firstIncomplete = get().getFirstIncompleteWordForAnimal(animalId);
@@ -169,6 +177,16 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentWordId: null,
     });
   },
+
+  toggleDevTools: () =>
+    set((state) => ({
+      devToolsEnabled: !state.devToolsEnabled,
+    })),
+
+  setDevTools: (enabled) =>
+    set({
+      devToolsEnabled: enabled,
+    }),
 }));
 
 /**

@@ -4,6 +4,7 @@ import { WordDefinition } from '../types/phoneme';
 import { ScrubTrack } from './ScrubTrack';
 import { useWordScrubber } from '../hooks/useWordScrubber';
 import { ScrubDevPanel } from './dev/ScrubDevPanel';
+import { useGameStore } from '../stores/gameStore';
 
 interface ScrubWordProps {
   word: WordDefinition;
@@ -20,6 +21,7 @@ export const ScrubWord = ({
   onInteractionStart,
   isWordAudioReady = true,
 }: ScrubWordProps) => {
+  const devToolsEnabled = useGameStore((state) => state.devToolsEnabled);
   const isDraggingRef = useRef(false);
   const pendingCompletionRef = useRef(false);
   const maxProgressRef = useRef(0);
@@ -161,7 +163,7 @@ export const ScrubWord = ({
         </div>
       )}
 
-      {import.meta.env.DEV && (
+      {import.meta.env.DEV && devToolsEnabled && (
         <ScrubDevPanel
           wordId={word.id}
           letters={graphemes}

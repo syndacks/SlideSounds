@@ -31,22 +31,14 @@ export const useAnimalState = (
   const [state, setState] = useState<AnimalAvatarState>('sleeping');
 
   useEffect(() => {
-    if (isCelebrating) {
-      setState('celebrating');
-      return;
-    }
-
-    const nextState = stateFromRatio(clampRatio(progressRatio));
-    if (nextState === state) {
-      return;
-    }
-
-    const timeout = window.setTimeout(() => {
-      setState(nextState);
-    }, 120);
-
-    return () => window.clearTimeout(timeout);
-  }, [progressRatio, isCelebrating, state]);
+    setState((current) => {
+      if (isCelebrating) {
+        return 'celebrating';
+      }
+      const nextState = stateFromRatio(clampRatio(progressRatio));
+      return nextState === current ? current : nextState;
+    });
+  }, [progressRatio, isCelebrating]);
 
   return state;
 };

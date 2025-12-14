@@ -48,10 +48,14 @@ export const CelebrationScreen = () => {
         </p>
 
         <div className="celebration-screen__words">
-          {animal.words.map((wordId) => {
+          {animal.words.map((wordId, index) => {
             const word = getWordById(wordId);
             return (
-              <span key={wordId} className="celebration-screen__word">
+              <span
+                key={wordId}
+                className="celebration-screen__word"
+                style={{ animationDelay: `${index * 80}ms` }}
+              >
                 {(word?.displayText ?? word?.text ?? wordId).toUpperCase()}
               </span>
             );
@@ -70,14 +74,14 @@ export const CelebrationScreen = () => {
         <div className="celebration-screen__actions">
           <button
             type="button"
-            className="celebration-screen__button celebration-screen__button--primary"
+            className="celebration-screen__button celebration-screen__button--primary celebration-screen__button--home"
             onClick={handleGoHome}
           >
             🏠 Go Home
           </button>
           <button
             type="button"
-            className="celebration-screen__button"
+            className="celebration-screen__button celebration-screen__button--accent"
             onClick={handlePlayAgain}
           >
             🔁 Play Again

@@ -133,9 +133,11 @@ export const ComprehensionCheckScreen = () => {
             const word = getWordById(optionId);
             if (!word) return null;
 
-            const displayWord = (word.displayText ?? word.text).toUpperCase();
+            const label = word.displayText ?? word.text;
+            const displayWord = label.toUpperCase();
             const firstLetter = displayWord.charAt(0);
             const remainder = displayWord.slice(1);
+            const image = word.image;
 
             const classes = ['check-option', `check-option--theme-${(index % 3) + 1}`];
             const isSelected = selectedId === optionId;
@@ -169,11 +171,30 @@ export const ComprehensionCheckScreen = () => {
                 <span className="check-option__status-icon" aria-hidden="true">
                   ✓
                 </span>
+                <div
+                  className={`check-option__image-wrapper${
+                    image ? '' : ' check-option__image-wrapper--placeholder'
+                  }`}
+                >
+                  {image ? (
+                    <img
+                      className="check-option__image"
+                      src={image.src}
+                      alt={image.alt ?? `Illustration for the word ${label}`}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <span className="check-option__image-fallback" aria-hidden="true">
+                      {firstLetter}
+                    </span>
+                  )}
+                </div>
                 <span className="check-option__word" aria-hidden="true">
                   <span className="check-option__word-initial">{firstLetter}</span>
                   {remainder}
                 </span>
-                <span className="check-option__label">{word.displayText ?? word.text}</span>
+                <span className="check-option__label">{label}</span>
                 <span className="check-option__decor" aria-hidden="true" />
               </button>
             );

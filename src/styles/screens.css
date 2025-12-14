@@ -175,6 +175,29 @@
   transform: scale(0.96);
 }
 
+.home-screen__dev-toggle {
+  margin-top: 8px;
+  padding: 6px 18px;
+  border-radius: 999px;
+  border: 1px dashed #cdd5f0;
+  background: #f7f8ff;
+  color: #5f6d94;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+}
+
+.home-screen__dev-toggle--active {
+  border-color: #8bc34a;
+  background: #f0ffe1;
+  color: #3f6c16;
+}
+
+.home-screen__dev-toggle:active {
+  transform: scale(0.97);
+}
+
 /* Habitat grid and card */
 
 .habitat-grid {
@@ -356,17 +379,47 @@
   position: relative;
   border-radius: 20px;
   border: 2px solid transparent;
-  padding: 24px 18px;
-  min-height: 150px;
+  padding: 24px 18px 28px;
+  min-height: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 12px;
+  text-align: center;
   cursor: pointer;
   box-shadow: 0 12px 25px rgba(31, 42, 68, 0.08);
   transition: transform 120ms ease, box-shadow 150ms ease, border-color 150ms ease,
     opacity 150ms ease;
+}
+
+.check-option__image-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(31, 42, 68, 0.05);
+}
+
+.check-option__image-wrapper--placeholder {
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  background: transparent;
+}
+
+.check-option__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.check-option__image-fallback {
+  font-size: clamp(2rem, 8vw, 3rem);
+  font-weight: 800;
+  color: rgba(31, 42, 68, 0.65);
 }
 
 .check-option__word {
@@ -407,14 +460,10 @@
 }
 
 .check-option__label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2a44;
+  letter-spacing: 0.08em;
 }
 
 .check-option--theme-1 {
@@ -503,6 +552,18 @@
   animation: confettiDrift 8s linear infinite;
 }
 
+.celebration-screen__confetti::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 15% 70%, rgba(255, 94, 117, 0.7) 4px, transparent 4px),
+    radial-gradient(circle at 85% 20%, rgba(122, 162, 255, 0.7) 3px, transparent 3px),
+    radial-gradient(circle at 40% 40%, rgba(125, 220, 147, 0.7) 5px, transparent 5px);
+  background-size: 160px 160px;
+  animation: confettiSparkle 10s linear infinite;
+  opacity: 0.45;
+}
+
 .celebration-screen__confetti::after {
   content: '';
   position: absolute;
@@ -542,6 +603,8 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
+  padding: 12px 0;
+  position: relative;
 }
 
 .celebration-screen__word {
@@ -551,6 +614,7 @@
   font-size: 0.9rem;
   font-weight: 700;
   animation: wordPop 0.5s ease forwards;
+  box-shadow: 0 6px 14px rgba(31, 42, 68, 0.08);
 }
 
 .celebration-screen__stars {
@@ -570,6 +634,8 @@
   margin-top: 16px;
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .celebration-screen__button {
@@ -578,10 +644,37 @@
   border: none;
   background: #f8fbff;
   cursor: pointer;
+  box-shadow: 0 12px 24px rgba(31, 42, 68, 0.12);
+  font-weight: 700;
+  color: #2b3456;
+  transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
 .celebration-screen__button--primary {
   background: #ffd36d;
+  color: #4a3508;
+}
+
+.celebration-screen__button--home {
+  min-width: 140px;
+}
+
+.celebration-screen__button--accent {
+  background: linear-gradient(135deg, #ff8ad7, #ff5e75);
+  color: #ffffff;
+  box-shadow: 0 18px 35px rgba(255, 104, 159, 0.4);
+  animation: buttonPulse 1.4s ease-in-out infinite;
+}
+
+.celebration-screen__button--accent:focus-visible,
+.celebration-screen__button--primary:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 3px;
+}
+
+.celebration-screen__button:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 8px 16px rgba(31, 42, 68, 0.12);
 }
 
 @media (max-width: 600px) {
@@ -660,6 +753,18 @@
   }
 }
 
+@keyframes buttonPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 18px 35px rgba(255, 104, 159, 0.35);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 25px 45px rgba(255, 104, 159, 0.5);
+  }
+}
+
 @keyframes confettiDrift {
   0% {
     background-position: 0 0;
@@ -675,5 +780,17 @@
   }
   100% {
     transform: translateY(20px);
+  }
+}
+
+@keyframes confettiSparkle {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.05) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
   }
 }

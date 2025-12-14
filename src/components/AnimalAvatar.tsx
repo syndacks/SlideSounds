@@ -24,6 +24,24 @@ const stateEmojiOverride: Partial<Record<AnimalAvatarState, string>> = {
   celebrating: '🎉',
 };
 
+const getAvatarImageForState = (animal: Animal, state: AnimalAvatarState): string | undefined => {
+  const images = animal.avatarImages;
+  if (!images) return undefined;
+  if (images[state]) return images[state];
+
+  // Fallbacks allow near-by poses to reuse artwork without gaps.
+  if (state === 'stirring') {
+    return images.sleeping ?? images.waking ?? images.awake;
+  }
+  if (state === 'waking') {
+    return images.waking ?? images.awake;
+  }
+  if (state === 'celebrating') {
+    return images.celebrating ?? images.awake;
+  }
+  return images.awake ?? Object.values(images)[0];
+};
+
 const sizeClassMap: Record<AnimalAvatarSize, string> = {
   small: 'animal-avatar--small',
   medium: 'animal-avatar--medium',
@@ -42,6 +60,7 @@ export const AnimalAvatar = memo(
     const displayEmoji = stateEmojiOverride[state] ?? animal.emoji;
     const statusLabel =
       state === 'celebrating' ? 'Celebrating!' : stateStatus[state] ?? 'Happy!';
+    const portraitSrc = getAvatarImageForState(animal, state);
 
     return (
       <div
@@ -51,8 +70,22 @@ export const AnimalAvatar = memo(
         <span className="animal-avatar__badge" aria-hidden="true">
           {stateBadge[state]}
         </span>
-        <div className="animal-avatar__emoji" aria-hidden="true">
-          {state === 'celebrating' ? `${displayEmoji}${animal.emoji}${displayEmoji}` : displayEmoji}
+        <div className="animal-avatar__figure" aria-hidden="true">
+          {portraitSrc ? (
+            <img
+              className="animal-avatar__image"
+              src={portraitSrc}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="animal-avatar__emoji">
+              {state === 'celebrating'
+                ? `${displayEmoji}${animal.emoji}${displayEmoji}`
+                : displayEmoji}
+            </div>
+          )}
         </div>
         <div className="animal-avatar__name">{animal.name}</div>
         <div className="animal-avatar__status">{statusLabel}</div>
