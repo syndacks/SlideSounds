@@ -12,10 +12,11 @@
 
 ## Related Documentation
 
-This handoff document is part of a 4-document specification suite. **Before implementing any phase, review the relevant sections of these companion documents:**
+This handoff document is part of a small specification suite. **Before implementing any new feature, review the relevant sections of these companion documents:**
 
 | Document | Location | Contains |
 |----------|----------|----------|
+| **Roadmap** | `ROADMAP.md` | Current implementation state and next phases (source of truth for “what’s next”) |
 | **Enhanced Phonics Syllabus** | `enhanced-phonics-syllabus.md` | Curriculum phases, phoneme introduction order, mastery criteria, pedagogical rationale, articulation guides |
 | **Sound Engine Strategy** | `sound-engine-strategy.md` | Complete audio asset list (95 files), word-to-phoneme parsing algorithm, lookup tables, crossfade specs, exception dictionaries |
 | **MVP Game Design Spec** | `phonics-adventure-mvp-spec.md` | Core gameplay loop, session flow, progression system, touch mechanics, visual feedback system, comprehension check logic |
@@ -2276,30 +2277,14 @@ After DALL-E generation:
 - All TypeScript compiles clean
 - Tested scrub interaction with mouse (touch should work same)
 
-## Phase C: Game Layer (Week 5-6)
+## Phase C–E (Historical)
 
-- [ ] Build AnimalCharacter with state animations
-- [ ] Create HabitatScreen and AnimalSelect
-- [ ] Implement lesson flow (word sets)
-- [ ] Add celebration screen
-- [ ] Integrate voice-over
+The original A–E phase checklist below was used to guide early development.  
+The project has since moved to a roadmap-based plan; see `ROADMAP.md` for the current phases and status.
 
-## Phase D: Polish (Week 7-8)
-
-- [ ] Add all 50 words and 8 animals
-- [ ] Implement phase unlock system
-- [ ] Build parent dashboard (basic)
-- [ ] Settings screen
-- [ ] Sound effects and juice
-- [ ] Bug fixes
-
-## Phase E: Launch Prep (Week 9-10)
-
-- [ ] User testing with 5-10 families
-- [ ] Iterate based on feedback
-- [ ] Performance optimization
-- [ ] App store assets
-- [ ] Launch!
+- Phase C (Game Layer): Animal character animations, habitat/animal selection screens, lesson flow, celebration, and VO integration.
+- Phase D (Content & Polish): Fill out all 50 words and 8 animals, phase unlock system, basic parent dashboard, settings, SFX/juice, and bug fixes.
+- Phase E (Launch Prep): User testing, iteration, performance, store assets, and release.
 
 ---
 

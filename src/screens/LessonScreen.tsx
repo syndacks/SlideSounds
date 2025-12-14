@@ -28,7 +28,6 @@ export const LessonScreen = () => {
   const playbackTimeoutRef = useRef<number | null>(null);
 
   const {
-    play: playWordAudio,
     hasAudio: hasWordAudio,
     duration: wordAudioDuration,
   } = useWordAudio(word);
@@ -56,7 +55,6 @@ export const LessonScreen = () => {
   const handleComplete = () => {
     if (!currentWordId || isListeningToWord) return;
     setIsListeningToWord(true);
-    void playWordAudio();
 
     const durationMs = Math.max(800, (wordAudioDuration ?? 1.1) * 1000 + 200);
     playbackTimeoutRef.current = window.setTimeout(() => {

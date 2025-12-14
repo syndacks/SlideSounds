@@ -84,6 +84,13 @@ export const COMPREHENSION_CHECKS: Record<string, ComprehensionCheck> = {
   mud: { wordId: 'mud', distractors: ['hut', 'nut'] },
   hut: { wordId: 'hut', distractors: ['nut', 'cut'] },
   bus: { wordId: 'bus', distractors: ['sun', 'pup'] },
+
+  // --- Additional Turtle words (short U) ---
+  bug: { wordId: 'bug', distractors: ['hug', 'mug'] },
+  hug: { wordId: 'hug', distractors: ['bug', 'hut'] },
+  tub: { wordId: 'tub', distractors: ['sub', 'bus'] },
+  sub: { wordId: 'sub', distractors: ['tub', 'sun'] },
+  mug: { wordId: 'mug', distractors: ['mud', 'bug'] },
 };
 
 export function getCheckForWord(wordId: string): ComprehensionCheck | undefined {

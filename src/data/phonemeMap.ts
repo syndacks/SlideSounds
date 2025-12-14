@@ -93,17 +93,17 @@ export const DIGRAPHS: Record<string, PhonemeMetadata> = {
 // WELDED SOUNDS (vowel + consonant as single unit)
 // ============================================================================
 export const WELDED_SOUNDS: Record<string, PhonemeMetadata> = {
-  am: makeMeta('am', 'am', null, 'welded', { durationMs: 300 }),
-  an: makeMeta('an', 'an', null, 'welded', { durationMs: 300 }),
-  all: makeMeta('all', 'all', null, 'welded', { durationMs: 350 }),
-  ang: makeMeta('ang', 'ang', null, 'welded', { durationMs: 315 }),
-  ing: makeMeta('ing', 'ing', null, 'welded', { durationMs: 285 }),
-  ong: makeMeta('ong', 'ong', null, 'welded', { durationMs: 315 }),
-  ung: makeMeta('ung', 'ung', null, 'welded', { durationMs: 295 }),
-  ank: makeMeta('ank', 'ank', null, 'welded', { durationMs: 315 }),
-  ink: makeMeta('ink', 'ink', null, 'welded', { durationMs: 295 }),
-  onk: makeMeta('onk', 'onk', null, 'welded', { durationMs: 315 }),
-  unk: makeMeta('unk', 'unk', null, 'welded', { durationMs: 305 }),
+  am: makeMeta('am', 'am', 'w_am.wav', 'welded', { durationMs: 300 }),
+  an: makeMeta('an', 'an', 'w_an.wav', 'welded', { durationMs: 300 }),
+  all: makeMeta('all', 'all', 'w_all.wav', 'welded', { durationMs: 350 }),
+  ang: makeMeta('ang', 'ang', 'w_ang.wav', 'welded', { durationMs: 315 }),
+  ing: makeMeta('ing', 'ing', 'w_ing.wav', 'welded', { durationMs: 285 }),
+  ong: makeMeta('ong', 'ong', 'w_ong.wav', 'welded', { durationMs: 315 }),
+  ung: makeMeta('ung', 'ung', 'w_ung.wav', 'welded', { durationMs: 295 }),
+  ank: makeMeta('ank', 'ank', 'w_ank.wav', 'welded', { durationMs: 315 }),
+  ink: makeMeta('ink', 'ink', 'w_ink.wav', 'welded', { durationMs: 295 }),
+  onk: makeMeta('onk', 'onk', 'w_onk.wav', 'welded', { durationMs: 315 }),
+  unk: makeMeta('unk', 'unk', 'w_unk.wav', 'welded', { durationMs: 305 }),
 };
 
 // ============================================================================

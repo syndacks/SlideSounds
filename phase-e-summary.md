@@ -1,6 +1,10 @@
-# Phase E: Content Expansion Summary
+# [HISTORICAL] Phase E: Content Expansion Summary
 
-**Completed:** December 8, 2025
+> **Status:** Historical summary document.  
+> The content described here has since been extended to a full 50-word MVP; see `ROADMAP.md` and `src/data/words.ts` for the latest.  
+> This file is retained for context but is not the authoritative source of truth.
+
+**Completed:** December 8, 2025 (initial 45-word expansion)
 
 ## What Was Done
 
@@ -8,8 +12,8 @@ Expanded the MVP from 1 animal/5 words to **8 animals/45 words** across 2 habita
 
 ### Content Added
 
-| Habitat | Animals | Words |
-|---------|---------|-------|
+| Habitat | Animals | Words (at that time) |
+|---------|---------|----------------------|
 | Farm 🌾 | Pig, Cow, Cat, Hen | 20 words (5 each) |
 | Pond 🌊 | Frog, Duck, Fish, Turtle | 25 words (5, 5, 5, 10) |
 | **Total** | **8 animals** | **45 words** |

@@ -66,7 +66,7 @@ export const WORDS: WordDefinition[] = [
   { id: 'top', text: 'top', displayText: 'top', phase: 2 },
   { id: 'hot', text: 'hot', displayText: 'hot', phase: 2 },
 
-  // ============================================================================
+ // ============================================================================
   // PHASE 2: SHORT U WORDS (Pond - Turtle)
   // ============================================================================
   { id: 'cup', text: 'cup', displayText: 'cup', phase: 2 },
@@ -79,6 +79,12 @@ export const WORDS: WordDefinition[] = [
   { id: 'mud', text: 'mud', displayText: 'mud', phase: 2 },
   { id: 'hut', text: 'hut', displayText: 'hut', phase: 2 },
   { id: 'bus', text: 'bus', displayText: 'bus', phase: 2 },
+  // Additional short U words to reach the 50-word MVP target (Turtle extensions)
+  { id: 'bug', text: 'bug', displayText: 'bug', phase: 2 },
+  { id: 'hug', text: 'hug', displayText: 'hug', phase: 2 },
+  { id: 'tub', text: 'tub', displayText: 'tub', phase: 2 },
+  { id: 'sub', text: 'sub', displayText: 'sub', phase: 2 },
+  { id: 'mug', text: 'mug', displayText: 'mug', phase: 2 },
 ];
 
 export const DEFAULT_LESSON_WORD_ID = 'sat';

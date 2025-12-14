@@ -6,7 +6,15 @@
 
 > **📌 COMPANION DOCUMENT**  
 > This is a companion document to `phonics-adventure-implementation-handoff.md`, which serves as the primary implementation guide.  
-> **All code examples (Python, JavaScript) in this document are PSEUDOCODE** — they demonstrate logic and algorithms. Implement equivalent functionality in TypeScript/Rust using idiomatic patterns.
+> **All code examples (Python, JavaScript) in this document are PSEUDOCODE** — they demonstrate logic and algorithms. Implement equivalent functionality in TypeScript/Rust using idiomatic patterns.  
+> For the current implementation status and next steps, see `ROADMAP.md`.
+
+---
+
+> **Implementation Notes (December 2025)**  
+> - The shipped prototype uses a **phoneme‑zone scrubbing model**: finger position moves a handle along a track (`ScrubTrack`), which triggers phoneme audio via `useWordScrubber`, with a separate whole‑word playback (`useWordBlendAudio`) on completion.  
+> - The alternative “continuous single‑buffer scrub” concept described in some internal docs is treated as a future experiment, not the current implementation.  
+> - The MVP word set is fully implemented with **50 CVC words across 8 animals and 2 habitats**, matching the list in Section 8.3 and the data in `src/data/words.ts`.
 
 ---
 
