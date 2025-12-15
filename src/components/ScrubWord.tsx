@@ -156,12 +156,13 @@ export const ScrubWord = ({
       </div>
 
       {/* Simple swipe hint - just an animated hand */}
-      {!isScrubbing && !hasCompletedOnce && (
-        <div className="scrub-word__hint" aria-hidden="true">
-          <span className="scrub-word__hint-hand">👆</span>
-          <span className="scrub-word__hint-arrow">→</span>
-        </div>
-      )}
+      <div
+        className={`scrub-word__hint${isScrubbing || hasCompletedOnce ? ' scrub-word__hint--hidden' : ''}`}
+        aria-hidden="true"
+      >
+        <span className="scrub-word__hint-hand">👆</span>
+        <span className="scrub-word__hint-arrow">→</span>
+      </div>
 
       {import.meta.env.DEV && devToolsEnabled && (
         <ScrubDevPanel

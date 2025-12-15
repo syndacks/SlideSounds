@@ -9,7 +9,7 @@ import { AnimalAvatar } from '../components/AnimalAvatar';
 import { useAnimalState } from '../hooks/useAnimalState';
 
 type OptionState = 'idle' | 'selecting' | 'correct' | 'incorrect';
-const CHECK_AUTO_PLAY_DELAY_MS = 1500;
+const CHECK_AUTO_PLAY_DELAY_MS = 800;
 
 export const ComprehensionCheckScreen = () => {
   const navigate = useNavigate();
@@ -97,50 +97,78 @@ export const ComprehensionCheckScreen = () => {
     }, 800);
   };
 
+  const handleTargetWordClick = () => {
+    if (hasWordAudio && !isAudioLoading) {
+      void playWordAudio();
+    }
+  };
+
   if (!wordId || !check || !targetWord || !currentAnimal) {
     return (
-      <div className="screen shell-screen">
-        <header className="shell-screen__header">
-          <button type="button" className="shell-screen__back" onClick={handleBack}>
+      <div className="screen check-screen">
+        <header className="check-screen__header">
+          <button type="button" className="check-screen__back-btn" onClick={handleBack}>
             ← Back
           </button>
-          <h1 className="shell-screen__title">Which one?</h1>
         </header>
-        <main className="shell-screen__content">
+        <main className="check-screen__body">
           <p>Check data not found.</p>
         </main>
       </div>
     );
   }
 
+  const targetWordDisplay = (targetWord.displayText ?? targetWord.text).toUpperCase();
+
   return (
-    <div className="screen shell-screen">
-      <header className="shell-screen__header">
-        <button type="button" className="shell-screen__back" onClick={handleBack}>
-          ← Back
+    <div className="screen check-screen">
+      {/* Minimal header - just back button and small companion */}
+      <header className="check-screen__header">
+        <button type="button" className="check-screen__back-btn" onClick={handleBack}>
+          ←
         </button>
-        <h1 className="shell-screen__title">Word Check</h1>
+        
+        {/* Small companion in corner */}
+        {currentAnimal && (
+          <div className="check-screen__companion">
+            <AnimalAvatar animal={currentAnimal} state={avatarState} size="small" />
+          </div>
+        )}
       </header>
 
-      <main className="shell-screen__content">
-        <div className="check-screen__top">
-          {currentAnimal && (
-            <AnimalAvatar animal={currentAnimal} state={avatarState} size="medium" />
-          )}
-          <p className="check-screen__prompt">
-            Which one is <span className="check-screen__word">&apos;{targetWord.text}&apos;</span>?
-          </p>
+      <main className="check-screen__body">
+        {/* Target Word Card - The hero element */}
+        <button 
+          type="button"
+          className="check-screen__target-card"
+          onClick={handleTargetWordClick}
+          disabled={!hasWordAudio || isAudioLoading}
+          aria-label={`Hear the word ${targetWord.text}`}
+        >
+          <span className="check-screen__target-speaker" aria-hidden="true">
+            {isAudioLoading ? '⏳' : '🔊'}
+          </span>
+          <span className="check-screen__target-word">
+            {targetWordDisplay}
+          </span>
+          <span className="check-screen__target-hint">
+            Tap to hear
+          </span>
+        </button>
+
+        {/* Simple visual prompt */}
+        <div className="check-screen__prompt">
+          <span className="check-screen__prompt-text">Find it!</span>
+          <span className="check-screen__prompt-arrow" aria-hidden="true">👇</span>
         </div>
 
+        {/* Option cards */}
         <div className="check-screen__options">
           {options.map((optionId) => {
             const word = getWordById(optionId);
             if (!word) return null;
 
             const label = word.displayText ?? word.text;
-            const displayWord = label.toUpperCase();
-            const firstLetter = displayWord.charAt(0);
-            const remainder = displayWord.slice(1);
             const image = word.image;
 
             const classes = ['check-option'];
@@ -190,31 +218,17 @@ export const ComprehensionCheckScreen = () => {
                     />
                   ) : (
                     <span className="check-option__image-fallback" aria-hidden="true">
-                      {firstLetter}
+                      {label.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
-                <span className="check-option__word" aria-hidden="true">
-                  <span className="check-option__word-initial">{firstLetter}</span>
-                  {remainder}
+                <span className="check-option__word">
+                  {label}
                 </span>
-                <span className="check-option__label">{label}</span>
-                <span className="check-option__decor" aria-hidden="true" />
               </button>
             );
           })}
         </div>
-
-        <button
-          type="button"
-          className="check-screen__hear-again"
-          disabled={!hasWordAudio}
-          onClick={() => {
-            void playWordAudio();
-          }}
-        >
-          {isAudioLoading ? 'Loading sound…' : '🔊 Tap to Hear'}
-        </button>
       </main>
     </div>
   );

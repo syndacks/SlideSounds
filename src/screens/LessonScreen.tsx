@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ScrubWord } from '../components/ScrubWord';
+import { WordImageReveal } from '../components/WordImageReveal';
 import { getWordById } from '../data/words';
 import { getAnimalById } from '../data/animals';
 import { getHabitatByAnimalId } from '../data/habitats';
@@ -88,6 +89,8 @@ export const LessonScreen = () => {
     );
   }
 
+  const isWordComplete = isListeningToWord;
+
   return (
     <div className="lesson-screen">
       <header className="lesson-screen__header">
@@ -100,17 +103,28 @@ export const LessonScreen = () => {
           >
             ← Back
           </button>
+          
+          {/* Small animal companion in corner - no longer the star */}
+          {currentAnimal && (
+            <div className="lesson-screen__companion">
+              <AnimalAvatar animal={currentAnimal} state={avatarState} size="small" />
+            </div>
+          )}
+          
           <span className="lesson-screen__progress">
             {currentIndex || 1} / {totalWords || 5}
           </span>
         </div>
       </header>
 
-      {currentAnimal && (
-        <div className="lesson-screen__avatar-wrapper">
-          <AnimalAvatar animal={currentAnimal} state={avatarState} size="large" />
-        </div>
-      )}
+      {/* Word image is now the hero - mystery reveal system */}
+      <div className="lesson-screen__reveal-wrapper">
+        <WordImageReveal 
+          word={word} 
+          progress={scrubProgress} 
+          isComplete={isWordComplete}
+        />
+      </div>
 
       <ScrubWord
         word={word}

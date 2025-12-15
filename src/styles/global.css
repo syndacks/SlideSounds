@@ -155,6 +155,49 @@ button:active:not(:disabled) {
   color: #3a4262;
 }
 
+/* Small companion animal in header - supporting role, not the star */
+.lesson-screen__companion {
+  transform: scale(0.65);
+  transform-origin: center;
+  opacity: 0.9;
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.lesson-screen__companion:hover {
+  transform: scale(0.7);
+  opacity: 1;
+}
+
+/* Hide the animal name in companion mode to keep it minimal */
+.lesson-screen__companion .animal-avatar__name {
+  display: none;
+}
+
+.lesson-screen__companion .animal-avatar {
+  padding: 8px;
+  min-width: auto;
+  border-radius: 16px;
+}
+
+.lesson-screen__companion .animal-avatar__figure {
+  width: 48px;
+}
+
+.lesson-screen__companion .animal-avatar__badge {
+  top: 2px;
+  right: 4px;
+  font-size: 0.6rem;
+  padding: 1px 4px;
+}
+
+/* Word reveal wrapper - the new hero area */
+.lesson-screen__reveal-wrapper {
+  margin: 16px auto 24px;
+  max-width: 280px;
+  display: flex;
+  justify-content: center;
+}
+
 
 /* ============================================================================
    ANIMAL AVATAR
@@ -591,6 +634,15 @@ button:active:not(:disabled) {
   border-radius: 999px;
   box-shadow: 0 4px 20px rgba(40, 60, 100, 0.1);
   animation: hintPulse 2s ease-in-out infinite;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.scrub-word__hint--hidden {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  pointer-events: none;
+  visibility: hidden;
+  animation: none;
 }
 
 .scrub-word__hint-hand {
@@ -906,4 +958,180 @@ button:active:not(:disabled) {
   border-radius: 8px;
   background: #ff8132;
   animation: tutorialSwipe 1.2s ease-in-out infinite;
+}
+
+/* ============================================================================
+   WORD IMAGE REVEAL - Mystery reveal system
+   ============================================================================ */
+
+.word-reveal {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #f8fbff 0%, #fff8f2 100%);
+  border: 3px solid #e8edf8;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 32px rgba(40, 60, 100, 0.1);
+  transition: border-color 300ms ease, box-shadow 300ms ease;
+}
+
+.word-reveal--complete {
+  border-color: #7dd87d;
+  box-shadow: 0 16px 40px rgba(100, 200, 100, 0.25);
+  animation: revealCelebrate 0.5s ease-out;
+}
+
+/* Mystery overlay - the "what is it?" state */
+.word-reveal__mystery {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(145deg, #f0f4ff 0%, #e8f0ff 100%);
+  z-index: 2;
+  transition: opacity 300ms ease;
+}
+
+.word-reveal__mystery-icon {
+  font-size: 3.5rem;
+  animation: mysteryPulse 1.5s ease-in-out infinite;
+}
+
+.word-reveal__mystery-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #5a6fa8;
+  text-align: center;
+  padding: 0 12px;
+}
+
+/* The actual revealed content */
+.word-reveal__content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 150ms ease-out, opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+.word-reveal__image {
+  width: 85%;
+  height: 85%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(47, 28, 12, 0.2));
+}
+
+/* Fallback for words without images */
+.word-reveal__fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #fff9f2 0%, #fff4e6 100%);
+}
+
+.word-reveal__fallback-letter {
+  font-size: 5rem;
+  font-weight: 800;
+  color: #e63946;
+  text-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+}
+
+/* Celebration sparkles */
+.word-reveal__celebration {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.word-reveal__sparkle {
+  position: absolute;
+  font-size: 1.5rem;
+  animation: sparklePop 0.6s ease-out forwards;
+}
+
+.word-reveal__sparkle--1 {
+  top: 10%;
+  left: 15%;
+  animation-delay: 0ms;
+}
+
+.word-reveal__sparkle--2 {
+  top: 5%;
+  right: 20%;
+  animation-delay: 100ms;
+}
+
+.word-reveal__sparkle--3 {
+  bottom: 15%;
+  right: 10%;
+  animation-delay: 200ms;
+}
+
+@keyframes mysteryPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes revealCelebrate {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes sparklePop {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3) rotate(15deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments for word reveal */
+@media (max-width: 600px) {
+  .word-reveal {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .word-reveal__mystery-icon {
+    font-size: 2.5rem;
+  }
+  
+  .word-reveal__mystery-text {
+    font-size: 0.8rem;
+  }
+  
+  .word-reveal__fallback-letter {
+    font-size: 4rem;
+  }
 }
