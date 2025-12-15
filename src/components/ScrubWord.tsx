@@ -12,6 +12,8 @@ interface ScrubWordProps {
   onProgressChange?: (ratio: number) => void;
   onInteractionStart?: () => void;
   isWordAudioReady?: boolean;
+  isLocked?: boolean;
+  lockMessage?: string;
 }
 
 export const ScrubWord = ({
@@ -20,6 +22,8 @@ export const ScrubWord = ({
   onProgressChange,
   onInteractionStart,
   isWordAudioReady = true,
+  isLocked = false,
+  lockMessage,
 }: ScrubWordProps) => {
   const devToolsEnabled = useGameStore((state) => state.devToolsEnabled);
   const isDraggingRef = useRef(false);
@@ -62,13 +66,15 @@ export const ScrubWord = ({
   }, [anchorRatios, stopScrubPlayback, word.id]);
 
   const handleScrubStart = useCallback(() => {
+    if (isLocked) return;
     onInteractionStart?.();
     isDraggingRef.current = true;
     setIsScrubbing(true);
-  }, [onInteractionStart]);
+  }, [isLocked, onInteractionStart]);
 
   const handleScrubMove = useCallback(
     (ratio: number) => {
+      if (isLocked) return;
       setProgressRatio(ratio);
       maxProgressRef.current = Math.max(maxProgressRef.current, ratio);
       // Track if user ever touched the beginning (first 15% of track)
@@ -77,11 +83,12 @@ export const ScrubWord = ({
       }
       setScrubPosition(ratio);
     },
-    [setScrubPosition],
+    [isLocked, setScrubPosition],
   );
 
   const handleScrubEnd = useCallback(
     (ratio: number) => {
+      if (isLocked) return;
       if (!isDraggingRef.current) {
         return;
       }
@@ -114,7 +121,7 @@ export const ScrubWord = ({
         }
       }
     },
-    [isScrubberReady, isWordAudioReady, onComplete, playWord, stopScrubPlayback],
+    [isLocked, isScrubberReady, isWordAudioReady, onComplete, playWord, stopScrubPlayback],
   );
 
   // If the learner already completed the scrub while audio was still loading,
@@ -140,10 +147,18 @@ export const ScrubWord = ({
   return (
     <div className="scrub-word-wrapper">
       <div
-        className={`scrub-word ${hasCompletedOnce ? 'scrub-word--complete' : ''} ${isScrubbing ? 'scrub-word--scrubbing' : ''}`}
+        className={`scrub-word${hasCompletedOnce ? ' scrub-word--complete' : ''}${isScrubbing ? ' scrub-word--scrubbing' : ''}${isLocked ? ' scrub-word--locked' : ''}`}
         role="group"
         aria-label={`Scrubbable word ${word.displayText ?? word.text}`}
       >
+        {isLocked && (
+          <div className="scrub-word__lock-banner">
+            <span className="scrub-word__lock-icon" aria-hidden="true">
+              🔒
+            </span>
+            <span>{lockMessage ?? 'Say the word to unlock the slider'}</span>
+          </div>
+        )}
         <ScrubTrack
           key={word.id}
           letters={graphemes}

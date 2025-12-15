@@ -11,6 +11,8 @@ import { TutorialOverlay } from '../components/TutorialOverlay';
 import { useTutorialState } from '../hooks/useTutorialState';
 import { useGameStore, useWordNavigation } from '../stores/gameStore';
 import { useWordAudio } from '../hooks/useWordAudio';
+import { SpeakPromptCard } from '../components/SpeakPromptCard';
+import { useSpeechRecognizer } from '../hooks/useSpeechRecognizer';
 
 export const LessonScreen = () => {
   const navigate = useNavigate();
@@ -27,11 +29,29 @@ export const LessonScreen = () => {
   const tutorial = useTutorialState();
   const [isListeningToWord, setIsListeningToWord] = useState(false);
   const playbackTimeoutRef = useRef<number | null>(null);
+  const [lessonPhase, setLessonPhase] = useState<'listen' | 'scrub'>('listen');
 
   const {
     hasAudio: hasWordAudio,
     duration: wordAudioDuration,
   } = useWordAudio(word);
+
+  const {
+    supportsSpeech,
+    status: speechStatus,
+    partialTranscript,
+    finalTranscript,
+    matchStatus,
+    errorMessage: speechError,
+    startListening: startSpeech,
+    stopListening: stopSpeech,
+    reset: resetSpeech,
+  } = useSpeechRecognizer({
+    expectedUtterances: word ? [word.text] : [],
+    language: 'en-US',
+    autoStart: false,
+    enabled: Boolean(word),
+  });
 
   useEffect(() => {
     if (!animalId) {
@@ -48,13 +68,29 @@ export const LessonScreen = () => {
     }
   }, [animalId, currentWordId, navigate]);
 
+  useEffect(() => {
+    if (!word) return;
+    setLessonPhase(supportsSpeech ? 'listen' : 'scrub');
+    resetSpeech();
+    return () => {
+      stopSpeech();
+    };
+  }, [word?.id, supportsSpeech, resetSpeech, stopSpeech]);
+
+  useEffect(() => {
+    if (lessonPhase === 'listen' && matchStatus === 'match') {
+      setLessonPhase('scrub');
+      stopSpeech();
+    }
+  }, [lessonPhase, matchStatus, stopSpeech]);
+
   const handleBack = () => {
     const habitat = animalId ? getHabitatByAnimalId(animalId) : undefined;
     navigate(`/animals/${habitat?.id ?? 'farm'}`);
   };
 
   const handleComplete = () => {
-    if (!currentWordId || isListeningToWord) return;
+    if (!currentWordId || isListeningToWord || lessonPhase !== 'scrub') return;
     setIsListeningToWord(true);
 
     const durationMs = Math.max(800, (wordAudioDuration ?? 1.1) * 1000 + 200);
@@ -90,6 +126,12 @@ export const LessonScreen = () => {
   }
 
   const isWordComplete = isListeningToWord;
+  const isScrubLocked = lessonPhase === 'listen';
+
+  const handleSkipSpeechPhase = () => {
+    setLessonPhase('scrub');
+    stopSpeech();
+  };
 
   return (
     <div className="lesson-screen">
@@ -126,12 +168,32 @@ export const LessonScreen = () => {
         />
       </div>
 
+      {word && (
+        <div className="lesson-screen__listen-section">
+          <SpeakPromptCard
+            word={word}
+            status={speechStatus}
+            supportsSpeech={supportsSpeech}
+            matchStatus={matchStatus}
+            partialTranscript={partialTranscript}
+            finalTranscript={finalTranscript}
+            errorMessage={speechError}
+            onStartListening={startSpeech}
+            onStopListening={stopSpeech}
+            onSkip={handleSkipSpeechPhase}
+            isUnlocked={!isScrubLocked}
+          />
+        </div>
+      )}
+
       <ScrubWord
         word={word}
         onComplete={handleComplete}
         onProgressChange={setScrubProgress}
         onInteractionStart={tutorial.dismiss}
         isWordAudioReady={hasWordAudio}
+        isLocked={isScrubLocked}
+        lockMessage="Say the word to unlock the slider"
       />
 
       {tutorial.isVisible && <TutorialOverlay onDismiss={tutorial.dismiss} />}
