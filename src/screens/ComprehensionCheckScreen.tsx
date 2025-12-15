@@ -47,9 +47,13 @@ export const ComprehensionCheckScreen = () => {
   const options = useMemo(() => {
     if (!check) return [];
     const ids = [check.wordId, ...check.distractors];
-    // Simple deterministic shuffle: just ensure correct answer is not always first.
-    return ids.sort((a, b) => (a < b ? -1 : 1));
-  }, [check]);
+    const shuffled = [...ids];
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [check, location.key]);
 
   const handleBack = () => {
     if (currentAnimal) {
@@ -129,7 +133,7 @@ export const ComprehensionCheckScreen = () => {
         </div>
 
         <div className="check-screen__options">
-          {options.map((optionId, index) => {
+          {options.map((optionId) => {
             const word = getWordById(optionId);
             if (!word) return null;
 
@@ -139,7 +143,7 @@ export const ComprehensionCheckScreen = () => {
             const remainder = displayWord.slice(1);
             const image = word.image;
 
-            const classes = ['check-option', `check-option--theme-${(index % 3) + 1}`];
+            const classes = ['check-option'];
             const isSelected = selectedId === optionId;
 
             if (isSelected && optionState === 'selecting') {

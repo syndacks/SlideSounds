@@ -453,7 +453,7 @@
 .check-option {
   position: relative;
   border-radius: 20px;
-  border: 2px solid transparent;
+  border: 2px solid rgba(31, 42, 68, 0.08);
   padding: 24px 18px 28px;
   min-height: 220px;
   display: flex;
@@ -466,6 +466,7 @@
   box-shadow: 0 12px 25px rgba(31, 42, 68, 0.08);
   transition: transform 120ms ease, box-shadow 150ms ease, border-color 150ms ease,
     opacity 150ms ease;
+  background: #ffffff;
 }
 
 .check-option__image-wrapper {
@@ -506,7 +507,7 @@
 
 .check-option__word-initial {
   font-size: 1.2em;
-  color: #ff7e47;
+  color: inherit;
 }
 
 .check-option__decor {
@@ -539,21 +540,6 @@
   font-weight: 600;
   color: #1f2a44;
   letter-spacing: 0.08em;
-}
-
-.check-option--theme-1 {
-  background: linear-gradient(135deg, #fff6ea, #ffe2c8);
-  border-color: rgba(255, 193, 125, 0.4);
-}
-
-.check-option--theme-2 {
-  background: linear-gradient(135deg, #e8ffef, #caf6da);
-  border-color: rgba(136, 207, 166, 0.5);
-}
-
-.check-option--theme-3 {
-  background: linear-gradient(135deg, #e7f1ff, #cadcff);
-  border-color: rgba(122, 162, 255, 0.5);
 }
 
 .check-option--selecting {
